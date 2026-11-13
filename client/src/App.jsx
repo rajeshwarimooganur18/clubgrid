@@ -17,6 +17,19 @@ import AntarangaD from "./AntarangaD";
 import Tashan from "./Tashan";
 import Dmax from "./Dmax";
 
+// MUSIC CLUB
+import MusicClub from "./MusicClub";
+import AntarangaM from "./AntarangaM";
+import Finearts from "./Finearts";
+import Museart from "./Museart";
+import Nadamritaa from "./Nadamritaa";
+
+// CODING CLUB
+import CodeClub from "./CodeClub";
+import Anonymous from "./Anonymous";
+import QwertyIO from "./QwertyIO";
+import GDG from "./GDG";
+import Aerospace from "./Aerospace";
 const clubs = [
   {
     name: "Drama Club",
@@ -55,6 +68,7 @@ const clubs = [
 function Home() {
   return (
     <div className="clubgrid-page">
+
       {/* NAVBAR */}
       <header className="cg-navbar">
         <a href="/" className="cg-brand">
@@ -163,6 +177,10 @@ function Home() {
                       ? "/clubs/drama"
                       : club.name === "Dance Club"
                       ? "/clubs/dance"
+                      : club.name === "Music Club"
+                      ? "/clubs/music"
+                      : club.name === "Coding Club"
+                      ? "/clubs/coding"
                       : `/login?club=${encodeURIComponent(club.name)}`
                   }
                   className="cg-view-details"
@@ -182,6 +200,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+
         {/* HOME */}
         <Route path="/" element={<Home />} />
 
@@ -245,11 +264,61 @@ function App() {
           element={<Dmax />}
         />
 
+        {/* MUSIC CLUB */}
+        <Route
+          path="/clubs/music"
+          element={<MusicClub />}
+        />
+
+        {/* MUSIC TEAMS */}
+        <Route
+          path="/clubs/music/antarangam"
+          element={<AntarangaM />}
+        />
+
+        <Route
+          path="/clubs/music/finearts"
+          element={<Finearts />}
+        />
+
+        <Route
+          path="/clubs/music/musearts"
+          element={<Museart />}
+        />
+
+        <Route
+          path="/clubs/music/nadamrita"
+          element={<Nadamritaa />}
+        />
+
+        {/* CODING CLUB */}
+        <Route
+          path="/clubs/coding"
+          element={<CodeClub />}
+        />
+         <Route
+          path="/clubs/coding/anonymous"
+          element={<Anonymous />}
+        />
+         <Route
+          path="/clubs/coding/qwerty"
+          element={<QwertyIO />}
+        />
+         <Route
+          path="/clubs/coding/google-developer"
+          element={<GDG />}
+        />
+         <Route
+          path="/clubs/coding/aerospace"
+          element={<Aerospace />}
+        />
+
         {/* UNKNOWN ROUTES */}
         <Route
           path="*"
           element={<Navigate to="/" replace />}
         />
+
       </Routes>
     </BrowserRouter>
   );

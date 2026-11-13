@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 const teams = [
   {
     name: "Antaranga",
-    image: "/antaranga-dance.png",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDWHYJoQIpzCqL_tIDbi_ahlz6j3kJ0ovudEr5_pcHiA&s=10",
     description:
       "Antaranga celebrates the beauty of dance, culture, and artistic expression. It brings students together through energetic performances, traditional movements, and creative choreography.",
     members: "20+ Members",
@@ -11,7 +11,7 @@ const teams = [
   },
   {
     name: "Diversity",
-    image: "/diversity.png",
+    image : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmwYEeeRfG8hMlntg8rdIGZmvaBRivv6vJJyXi-bocrw&s=10",
     description:
       "Diversity brings together different dance styles, cultures, and expressions. It provides students a platform to explore their creativity, showcase their talents, and celebrate the art of movement.",
     members: "20+ Members",
@@ -19,7 +19,7 @@ const teams = [
   },
   {
     name: "Alphas",
-    image: "/alphas.png",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQIRjU6Dxa9WHNDaKqzgXmQY_2cX19bBebZsijGAaUNQ&s=10",
     description:
       "Alphas is a passionate dance team that brings energy, coordination, and creativity to every performance. The team encourages students to develop their dancing skills and express themselves through movement.",
     members: "20+ Members",
@@ -27,7 +27,7 @@ const teams = [
   },
   {
     name: "Intensity",
-    image: "/intensity.png",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEROpy1I2oBE3pVmonDopp14_-rDuilLO6mFSd9tX3Hw&s",
     description:
       "Intensity is all about powerful performances, energetic choreography, and stage presence. The team gives passionate dancers an opportunity to challenge themselves and shine on stage.",
     members: "20+ Members",
@@ -35,19 +35,19 @@ const teams = [
   },
   {
     name: "Dmax",
-    image: "/dance-team5.png",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI3GeQE8DiZdMdBbULHGwM63fXHlvHJaxSvl5erj75Vg&s=10",
     description:
       "Discover another talented Dance Club team, bringing together passionate performers who express their creativity through dance.",
     members: "20+ Members",
-    link: "/clubs/dance/team5",
+    link: "/clubs/dance/dmax",
   },
   {
-    name: "Tashan",
-    image: "/dance-team6.png",
+    name: "Tushan",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpPiHd_t4shas6cLygwgDPgbNzDRUfpbgi9LY2GvuSXw&s=10",
     description:
       "A creative space for dancers to learn, collaborate, explore different dance forms, and showcase their passion through performances.",
     members: "20+ Members",
-    link: "/clubs/dance/team6",
+    link: "/clubs/dance/tashan",
   },
 ];
 
@@ -89,11 +89,16 @@ export default function DanceClub() {
 
       {/* HERO */}
       <section className="dance-hero">
-        <h1>DANCE CLUB</h1>
-        <img
-          src="/dance-banner.png"
-          alt="Dance Club banner"
-        />
+        <div className="dance-hero-title">
+          <h1  style={{color:"white"}}>DANCE CLUB</h1>
+        </div>
+
+        <div className="dance-hero-art">
+          <img
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ6jz56oduMWQ1EduOfYWCppizy0hx-uB_GwllFHjWoUQPLddGw-BYkRE&s=10"
+            alt="Dance Club banner"
+          />
+        </div>
       </section>
 
       {/* MAIN CONTENT */}
@@ -112,12 +117,14 @@ export default function DanceClub() {
 
         {/* OUR TEAMS */}
         <section className="dance-teams">
-          <h2>Our Teams</h2>
+          <div className="dance-teams-heading">
+            <h2>Our Teams</h2>
 
-          <p className="dance-teams-intro">
-            Explore the Dance Club's teams, discover your
-            passion, and join the one that suits you best!
-          </p>
+            <p className="dance-teams-intro">
+              Explore the Dance Club's teams, discover your
+              passion, and join the one that suits you best!
+            </p>
+          </div>
 
           <div className="dance-team-list">
             {teams.map((team) => (
@@ -125,12 +132,11 @@ export default function DanceClub() {
                 className="dance-team-card"
                 key={team.name}
               >
-                <div className="dance-team-image">
-                  <img
-                    src={team.image}
-                    alt={`${team.name} logo`}
-                  />
-                </div>
+                <img
+                  className="dance-team-image"
+                  src={team.image}
+                  alt={`${team.name} logo`}
+                />
 
                 <div className="dance-team-info">
                   <h3>{team.name}</h3>
@@ -144,7 +150,7 @@ export default function DanceClub() {
                         Applications are open
                       </span>
 
-                      <span className="dance-badge">
+                      <span className="dance-badge dance-team-members">
                         {team.members}
                       </span>
                     </div>
@@ -174,354 +180,385 @@ export default function DanceClub() {
 
         .dance-page {
           min-height: 100vh;
-          background: #f7f8fc;
-          color: #20243a;
-          font-family: Arial, sans-serif;
+          background: #ffffff;
+          color: #171717;
+          font-family: Arial, Helvetica, sans-serif;
         }
 
         /* NAVBAR */
 
         .dance-navbar {
-          height: 85px;
-          padding: 0 7%;
+          height: 68px;
+          padding: 0 4%;
           display: flex;
           align-items: center;
           justify-content: space-between;
           background: #ffffff;
-          box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+          border-bottom: 1px solid #e8e8e8;
+          box-shadow: 0 2px 7px rgba(0,0,0,0.05);
           position: relative;
-          z-index: 10;
+          z-index: 5;
         }
 
         .dance-brand {
+          font-size: 22px;
+          font-weight: 800;
+          color: #171717;
+          text-decoration: none;
           display: flex;
           align-items: center;
-          gap: 11px;
-          text-decoration: none;
-          color: #24243d;
-          font-size: 23px;
-          font-weight: 800;
+          gap: 8px;
         }
 
         .dance-brand-mark {
           display: grid;
-          grid-template-columns: repeat(2, 9px);
+          grid-template-columns: repeat(2, 8px);
           gap: 3px;
         }
 
         .dance-brand-mark i {
-          width: 9px;
-          height: 9px;
-          background: #7561d8;
-          border-radius: 3px;
-        }
-
-        .dance-brand-mark i:nth-child(2),
-        .dance-brand-mark i:nth-child(3) {
-          background: #b5a8f2;
+          width: 8px;
+          height: 8px;
+          background: #171717;
+          border-radius: 2px;
         }
 
         .dance-nav {
           display: flex;
           align-items: center;
-          gap: 34px;
+          gap: 38px;
         }
 
         .dance-nav a {
-          text-decoration: none;
-          color: #656579;
+          color: #222;
           font-size: 14px;
-          font-weight: 600;
+          text-decoration: none;
           transition: 0.2s;
         }
 
-        .dance-nav a:hover,
-        .dance-nav a.selected {
-          color: #7561d8;
+        .dance-nav a:hover {
+          color: #7547e8;
+        }
+
+        .dance-nav .selected {
+          background: #7849ed;
+          color: white;
+          padding: 10px 28px;
+          border-radius: 7px;
         }
 
         .dance-profile {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          text-decoration: none;
-          color: #555;
-        }
-
-        .dance-profile span:first-child {
-          width: 38px;
-          height: 38px;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #102c68;
+          color: white;
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 50%;
-          background: #7561d8;
-          color: white;
-          font-weight: 700;
+          font-weight: 600;
+          text-decoration: none;
+          gap: 5px;
         }
 
         .dance-profile-arrow {
-          font-size: 13px;
+          display: none;
         }
 
         /* HERO */
 
         .dance-hero {
-          height: 307px;
-          position: relative;
-          overflow: hidden;
-          background: #27223d;
+          min-height: 260px;
           display: flex;
           align-items: center;
-          justify-content: center;
+          justify-content: space-between;
+          overflow: hidden;
+          background: #100d17;
+          color: white;
+          position: relative;
         }
 
-        .dance-hero img {
-          position: absolute;
-          inset: 0;
+        .dance-hero-title {
+          width: 30%;
+          padding: 35px 3%;
+          z-index: 1;
+        }
+
+        .dance-hero-title h1 {
+          font-size: clamp(25px, 3vw, 38px);
+          margin: 0;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+        }
+
+        .dance-hero-art {
+          width: 70%;
+          height: 260px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .dance-hero-art img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          opacity: 0.48;
+          object-position: center 42%;
+          display: block;
         }
 
-        .dance-hero::after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(
-            90deg,
-            rgba(26,20,48,0.85),
-            rgba(65,48,105,0.35)
-          );
-        }
-
-        .dance-hero h1 {
-          position: relative;
-          z-index: 2;
-          color: white;
-          font-size: 48px;
-          letter-spacing: 5px;
-          font-weight: 800;
-          text-align: center;
-        }
-
-        /* MAIN CONTENT */
+        /* CONTENT */
 
         .dance-content {
-          max-width: 1150px;
+          padding: 25px 3% 45px;
+          max-width: 1500px;
           margin: auto;
-          padding: 55px 25px 80px;
-        }
-
-        /* ABOUT */
-
-        .dance-about {
-          background: white;
-          padding: 30px 35px;
-          border-radius: 13px;
-          box-shadow: 0 4px 18px rgba(0,0,0,0.04);
-          margin-bottom: 45px;
         }
 
         .dance-about h2,
-        .dance-teams h2 {
+        .dance-teams-heading h2 {
           font-size: 25px;
-          color: #282442;
-          margin: 0 0 15px;
+          margin: 0 0 10px;
+          font-weight: 750;
         }
 
-        .dance-about p {
-          color: #6d6d7d;
+        .dance-about p,
+        .dance-teams-heading p {
           font-size: 15px;
-          line-height: 1.8;
+          line-height: 1.55;
           margin: 0;
+          color: #333;
         }
 
-        /* TEAMS */
+        .dance-teams-heading {
+          margin-top: 25px;
+          margin-bottom: 14px;
+        }
 
         .dance-teams-intro {
-          color: #77778a;
-          font-size: 14px;
-          margin-bottom: 27px;
-          line-height: 1.6;
+          margin-bottom: 0;
         }
+
+        /* TEAM CARDS */
 
         .dance-team-list {
           display: flex;
           flex-direction: column;
-          gap: 23px;
+          gap: 18px;
         }
 
         .dance-team-card {
           display: flex;
-          background: white;
-          border-radius: 14px;
-          overflow: hidden;
-          min-height: 220px;
-          box-shadow: 0 4px 18px rgba(0,0,0,0.045);
-          transition: transform 0.25s, box-shadow 0.25s;
+          align-items: stretch;
+          gap: 20px;
+          min-height: 170px;
+          padding: 10px;
+          border: 1px solid #d7d7d7;
+          border-radius: 9px;
+          background: #fff;
+          transition: 0.25s ease;
         }
 
         .dance-team-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 9px 25px rgba(0,0,0,0.09);
+          border-color: #9b7ae9;
+          box-shadow: 0 4px 14px rgba(90, 55, 160, 0.09);
+          transform: translateY(-2px);
         }
 
-        .dance-team-image {
-          width: 245px;
-          min-width: 245px;
-          background: #eeeafa;
-          overflow: hidden;
-        }
-
-        .dance-team-image img {
-          width: 100%;
-          height: 100%;
-          min-height: 220px;
-          object-fit: cover;
-        }
+     .dance-team-image {
+  width: 190px;
+  height: 145px;
+  min-width: 190px;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 6px;
+  background: #eee;
+}
 
         .dance-team-info {
           flex: 1;
-          padding: 25px 28px;
           display: flex;
           flex-direction: column;
-          justify-content: space-between;
+          justify-content: center;
+          padding: 5px 8px 5px 0;
         }
 
         .dance-team-info h3 {
-          color: #30294d;
-          font-size: 21px;
-          margin: 0 0 11px;
+          font-size: 22px;
+          margin: 0 0 8px;
+          font-weight: 750;
         }
 
         .dance-team-info p {
-          color: #727284;
           font-size: 14px;
-          line-height: 1.7;
-          margin: 0 0 20px;
+          line-height: 1.45;
+          color: #333;
+          margin: 0 0 12px;
         }
 
         .dance-team-bottom {
           display: flex;
-          justify-content: space-between;
           align-items: center;
-          gap: 15px;
+          gap: 12px;
           flex-wrap: wrap;
         }
 
         .dance-team-badges {
           display: flex;
-          gap: 9px;
+          align-items: center;
+          gap: 12px;
           flex-wrap: wrap;
         }
 
         .dance-badge {
-          background: #f0edfc;
-          color: #7561d8;
-          padding: 8px 12px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 700;
+          background: linear-gradient(110deg, #8152ef, #a17af7);
+          color: white;
+          padding: 9px 20px;
+          border-radius: 25px;
+          font-size: 13px;
+          text-align: center;
+          min-width: 145px;
+        }
+
+        .dance-team-members {
+          background: linear-gradient(110deg, #8152ef, #a17af7);
+          color: white;
+          padding: 9px 22px;
+          border-radius: 25px;
+          font-size: 13px;
+          text-align: center;
+          min-width: 145px;
         }
 
         .dance-details-button {
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          padding: 11px 19px;
-          background: #7561d8;
-          color: white;
+          margin-left: auto;
           text-decoration: none;
-          border-radius: 7px;
+          color: #7550c9;
+          border: 1px solid #7550c9;
+          padding: 9px 22px;
+          border-radius: 5px;
           font-size: 13px;
-          font-weight: 700;
-          transition: 0.2s;
+          text-align: center;
           white-space: nowrap;
+          transition: 0.2s;
         }
 
         .dance-details-button:hover {
-          background: #5d49bf;
-          transform: translateX(2px);
+          background: #7550c9;
+          color: white;
         }
 
         .dance-details-button span {
-          font-size: 17px;
+          margin-left: 5px;
         }
 
         /* RESPONSIVE */
 
-        @media (max-width: 850px) {
-          .dance-navbar {
-            padding: 0 4%;
-          }
+        @media (max-width: 800px) {
 
           .dance-nav {
-            gap: 15px;
-          }
-
-          .dance-team-image {
-            width: 200px;
-            min-width: 200px;
-          }
-        }
-
-        @media (max-width: 650px) {
-          .dance-navbar {
-            height: auto;
-            padding: 18px 5%;
-            flex-wrap: wrap;
-            gap: 18px;
-          }
-
-          .dance-nav {
-            order: 3;
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 5px;
+            gap: 12px;
           }
 
           .dance-nav a {
-            white-space: nowrap;
+            font-size: 12px;
+          }
+
+          .dance-team-card {
+            gap: 12px;
+          }
+
+          .dance-team-image {
+            width: 30%;
+            min-width: 150px;
+          }
+
+          .dance-team-bottom {
+            gap: 8px;
+          }
+
+          .dance-badge,
+          .dance-team-members {
+            min-width: unset;
+            padding: 8px 12px;
+          }
+
+          .dance-details-button {
+            margin-left: 0;
+          }
+
+        }
+
+        @media (max-width: 600px) {
+
+          .dance-navbar {
+            height: auto;
+            min-height: 60px;
+            padding: 12px 4%;
+          }
+
+          .dance-brand {
+            font-size: 18px;
+          }
+
+          .dance-nav {
+            display: none;
           }
 
           .dance-hero {
-            height: 220px;
+            min-height: 180px;
           }
 
-          .dance-hero h1 {
-            font-size: 32px;
+          .dance-hero-title {
+            width: 42%;
+            padding: 15px;
+          }
+
+          .dance-hero-title h1 {
+            font-size: 22px;
+          }
+
+          .dance-hero-art {
+            width: 58%;
+            height: 180px;
           }
 
           .dance-content {
-            padding: 35px 16px 55px;
+            padding: 22px 4%;
           }
 
-          .dance-about {
-            padding: 23px;
+          .dance-about h2,
+          .dance-teams-heading h2 {
+            font-size: 21px;
           }
 
           .dance-team-card {
             flex-direction: column;
+            gap: 12px;
           }
 
           .dance-team-image {
             width: 100%;
-            height: 190px;
-          }
-
-          .dance-team-image img {
-            min-height: 190px;
+            height: 180px;
+            min-height: 180px;
           }
 
           .dance-team-info {
-            padding: 22px;
+            padding: 5px;
+          }
+
+          .dance-team-info h3 {
+            font-size: 20px;
           }
 
           .dance-team-bottom {
             align-items: flex-start;
           }
+
+          .dance-details-button {
+            width: 100%;
+            margin-top: 5px;
+          }
+
         }
 
       `}</style>
