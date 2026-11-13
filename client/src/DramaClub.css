@@ -1,0 +1,408 @@
+.drama-page {
+  min-height: 100vh;
+  background: #fff;
+  color: #111;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Navigation */
+.drama-navbar {
+  height: 73px;
+  width: 100%;
+  padding: 0 29px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  background: #fff;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.drama-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #080808;
+  font-size: 28px;
+  font-weight: 750;
+  letter-spacing: -1.2px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.drama-brand-mark {
+  display: grid;
+  grid-template-columns: repeat(2, 11px);
+  grid-template-rows: repeat(2, 11px);
+  gap: 3px;
+}
+
+.drama-brand-mark i {
+  background: #080808;
+  border-radius: 4px;
+}
+
+.drama-nav {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.drama-nav a {
+  height: 44px;
+  padding: 0 23px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #111;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.drama-nav a.selected {
+  min-width: 112px;
+  color: white;
+  background: #7953ed;
+}
+
+.drama-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #111;
+  text-decoration: none;
+}
+
+.drama-profile > span:first-child {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #123779;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.drama-profile-arrow {
+  font-size: 17px;
+}
+
+/* Hero banner */
+.drama-hero {
+  height: 278px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: #050505;
+}
+
+.drama-hero h1 {
+  z-index: 1;
+  margin: 0;
+  padding-left: 3%;
+  color: white;
+  font-size: 45px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.drama-hero img {
+  position: absolute;
+  left: 25.5%;
+  top: 0;
+  width: 51.3%;
+  height: 100%;
+  object-fit: fill;
+}
+
+/* Main content */
+.drama-content {
+  padding: 27px 3% 40px;
+}
+
+.drama-about h2,
+.drama-teams h2 {
+  margin: 0 0 10px;
+  font-size: 32px;
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.7px;
+}
+
+.drama-about p,
+.drama-teams-intro {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.35;
+  font-weight: 400;
+}
+
+.drama-teams {
+  margin-top: 28px;
+}
+
+.drama-teams-intro {
+  margin-bottom: 15px;
+}
+
+/* Team cards */
+.drama-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 33px;
+}
+
+.drama-team-card {
+  min-height: 247px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 28% minmax(0, 1fr);
+  gap: 26px;
+  box-sizing: border-box;
+  border: 1px solid #cfcfcf;
+  border-radius: 11px;
+  background: white;
+}
+
+.drama-team-image {
+  width: 100%;
+  height: 218px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.drama-team-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.drama-team-info {
+  min-width: 0;
+  padding: 16px 12px 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.drama-team-info h3 {
+  margin: 0 0 10px;
+  font-size: 29px;
+  line-height: 1.15;
+  font-weight: 750;
+  letter-spacing: -0.8px;
+}
+
+.drama-team-info > p {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.drama-team-bottom {
+  margin-top: auto;
+  padding-top: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.drama-team-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.drama-badge {
+  min-width: 212px;
+  height: 44px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 30px;
+  background: #7953ed;
+  color: #fff;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.drama-details-button {
+  min-width: 225px;
+  height: 45px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  border: 2px solid #9277f0;
+  border-radius: 8px;
+  background: white;
+  color: #8064e6;
+  font-size: 18px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.drama-details-button span {
+  font-size: 22px;
+}
+
+/* Responsive layout */
+@media (max-width: 1050px) {
+  .drama-navbar {
+    padding: 0 18px;
+  }
+
+  .drama-brand {
+    font-size: 23px;
+  }
+
+  .drama-nav {
+    gap: 3px;
+  }
+
+  .drama-nav a {
+    padding: 0 12px;
+    font-size: 13px;
+  }
+
+  .drama-team-card {
+    grid-template-columns: 30% minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  .drama-team-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .drama-details-button {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 700px) {
+  .drama-navbar {
+    height: auto;
+    min-height: 70px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+
+  .drama-brand {
+    font-size: 23px;
+  }
+
+  .drama-profile {
+    margin-left: auto;
+  }
+
+  .drama-profile > span:first-child {
+    width: 38px;
+    height: 38px;
+  }
+
+  .drama-nav {
+    order: 3;
+    width: 100%;
+    height: auto;
+    overflow-x: auto;
+  }
+
+  .drama-nav a {
+    height: 38px;
+    padding: 0 13px;
+  }
+
+  .drama-hero {
+    height: 190px;
+  }
+
+  .drama-hero h1 {
+    padding-left: 18px;
+    font-size: 25px;
+  }
+
+  .drama-hero img {
+    left: 35%;
+    width: 65%;
+  }
+
+  .drama-content {
+    padding: 23px 16px 30px;
+  }
+
+  .drama-about h2,
+  .drama-teams h2 {
+    font-size: 27px;
+  }
+
+  .drama-about p,
+  .drama-teams-intro {
+    font-size: 17px;
+  }
+
+  .drama-team-list {
+    gap: 20px;
+  }
+
+  .drama-team-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .drama-team-image {
+    height: 210px;
+  }
+
+  .drama-team-info {
+    padding: 8px 5px 5px;
+  }
+
+  .drama-team-info h3 {
+    font-size: 25px;
+  }
+
+  .drama-team-info > p {
+    font-size: 16px;
+  }
+
+  .drama-team-bottom {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .drama-team-badges {
+    gap: 8px;
+  }
+
+  .drama-badge {
+    min-width: 0;
+    height: 40px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .drama-details-button {
+    width: 100%;
+    min-width: 0;
+    height: 43px;
+    font-size: 16px;
+  }
+}

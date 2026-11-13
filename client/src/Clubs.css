@@ -1,0 +1,145 @@
+
+.clubs-page {
+  min-height: 100vh;
+  background: #f8f7ff;
+  color: #25244b;
+  font-family: Arial, sans-serif;
+}
+
+.clubs-header {
+  padding: 22px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-bottom: 1px solid #eae8f5;
+}
+
+.clubs-logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #25244b;
+  text-decoration: none;
+}
+
+.clubs-logo span {
+  color: #7964ee;
+}
+
+.back-home {
+  text-decoration: none;
+  color: #6d5adb;
+  font-weight: bold;
+}
+
+.clubs-intro {
+  text-align: center;
+  padding: 65px 20px 40px;
+}
+
+.clubs-label {
+  color: #7964ee;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+}
+
+.clubs-intro h1 {
+  font-size: 38px;
+  margin-bottom: 15px;
+}
+
+.clubs-intro > p:last-child {
+  color: #707087;
+  line-height: 1.7;
+}
+
+.clubs-list {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 10px 24px 70px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.club-item {
+  background: white;
+  border: 1px solid #eeebf8;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 25px #29244b08;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.club-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 30px #29244b12;
+}
+
+.club-icon {
+  font-size: 38px;
+  margin-bottom: 18px;
+}
+
+.club-category {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #f0edff;
+  color: #6d5adb;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.club-item h2 {
+  font-size: 21px;
+  margin: 17px 0 12px;
+}
+
+.club-item > p {
+  color: #707087;
+  font-size: 14px;
+  line-height: 1.8;
+  min-height: 76px;
+}
+
+.club-join-button {
+  margin-top: 18px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  background: #7964ee;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.club-join-button:hover {
+  background: #6350d0;
+}
+
+.clubs-footer {
+  text-align: center;
+  padding: 25px;
+  color: #707087;
+  background: white;
+  font-size: 13px;
+}
+
+@media (max-width: 800px) {
+  .clubs-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .clubs-list {
+    grid-template-columns: 1fr;
+  }
+
+  .clubs-intro h1 {
+    font-size: 30px;
+  }
+}

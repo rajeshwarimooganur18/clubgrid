@@ -1,0 +1,247 @@
+
+.admin-dashboard {
+  min-height: 100vh;
+  background: #f8f7ff;
+  color: #25244b;
+  font-family: Arial, sans-serif;
+}
+
+.admin-header {
+  padding: 22px 7%;
+  background: white;
+  border-bottom: 1px solid #eae8f5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-logo {
+  font-size: 26px;
+  font-weight: 800;
+  text-decoration: none;
+  color: #25244b;
+}
+
+.admin-logo span {
+  color: #7964ee;
+}
+
+.admin-heading-label {
+  background: #eeebff;
+  color: #6d5adb;
+  border-radius: 20px;
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.admin-main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 45px 24px 60px;
+}
+
+.admin-welcome {
+  margin-bottom: 30px;
+}
+
+.admin-eyebrow {
+  color: #7964ee;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.admin-welcome h1 {
+  font-size: 34px;
+  margin: 12px 0;
+}
+
+.admin-welcome > p:last-child,
+.admin-section-title p {
+  color: #707087;
+  line-height: 1.6;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 36px;
+}
+
+.admin-stat-card {
+  background: white;
+  padding: 22px;
+  border: 1px solid #eeebf8;
+  border-radius: 14px;
+}
+
+.admin-stat-card > span {
+  font-size: 26px;
+}
+
+.admin-stat-card p {
+  color: #707087;
+  font-size: 13px;
+}
+
+.admin-stat-card h2 {
+  margin: 8px 0 0;
+  font-size: 30px;
+}
+
+.admin-applications {
+  background: white;
+  padding: 26px;
+  border: 1px solid #eeebf8;
+  border-radius: 16px;
+}
+
+.admin-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 24px;
+}
+
+.admin-section-title h2 {
+  margin: 0 0 8px;
+}
+
+.admin-section-title p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin-total {
+  background: #f0edff;
+  color: #6d5adb;
+  padding: 9px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #eeebf8;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.admin-table th {
+  background: #f8f7ff;
+  color: #707087;
+  font-size: 12px;
+}
+
+.admin-student-name {
+  font-weight: bold;
+}
+
+.admin-status {
+  display: inline-block;
+  padding: 7px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.admin-status-pending {
+  background: #fff3d6;
+  color: #956500;
+}
+
+.admin-status-accepted {
+  background: #e0f7e9;
+  color: #167342;
+}
+
+.admin-status-rejected {
+  background: #ffe6e6;
+  color: #b42323;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.admin-actions button,
+.admin-reset {
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.admin-accept {
+  background: #dcf7e5;
+  color: #167342;
+}
+
+.admin-reject {
+  background: #ffe6e6;
+  color: #b42323;
+}
+
+.admin-reset {
+  background: #eeebff;
+  color: #6d5adb;
+}
+
+.admin-note {
+  margin-top: 18px;
+  color: #707087;
+  font-size: 12px;
+}
+
+.admin-footer {
+  padding: 24px;
+  text-align: center;
+  background: white;
+  color: #707087;
+  font-size: 13px;
+}
+
+@media (max-width: 850px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-section-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 500px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-welcome h1 {
+    font-size: 28px;
+  }
+
+  .admin-applications {
+    padding: 16px;
+  }
+}
