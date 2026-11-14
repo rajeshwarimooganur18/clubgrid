@@ -1,41 +1,63 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 
-const teams = [
-  {
-    name: "Anonymous",
+const teamDetails = {
+  "Anonymous": {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFFjQZrlg6KJBt-IrQGUews1Yp-wv1H2HR7bY_Z1ks5Q&s=10",
-    description:
-      "Anonymous brings together passionate technology enthusiasts who enjoy exploring cybersecurity, ethical hacking, digital security, and solving technical challenges. A space to learn, experiment, and grow together.",
+    description: "Anonymous brings together passionate technology enthusiasts who enjoy exploring cybersecurity, ethical hacking, digital security, and solving technical challenges. A space to learn, experiment, and grow together.",
     members: "20+ Members",
     link: "/clubs/coding/Anonymous",
   },
-  {
-    name: "QWERTY.I/O",
+  "QWERTY.I/O": {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQld7GFR1LpIINM8eC5UEHe0qnyo_Yd5oFivMocgc2hVA&s=10",
-    description:
-      "QWERTY.I/O is a technical community that encourages students to explore programming, development, emerging technologies, and innovation through workshops, collaborative projects, and hands-on learning.",
+    description: "QWERTY.I/O is a technical community that encourages students to explore programming, development, emerging technologies, and innovation through workshops, collaborative projects, and hands-on learning.",
     members: "20+ Members",
     link: "/clubs/coding/qwerty",
   },
-  {
-    name: "Google Developer Team",
+  "Google Developer Team": {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSj6MAoH6o6WifnIFq1AnXcAOAWgbElOPqoybe8sZhAuQ&s",
-    description:
-      "Google Developer Team inspires students to build innovative solutions using modern technologies. It provides opportunities to explore development, participate in technical events, collaborate on projects, and improve practical skills.",
+    description: "Google Developer Team inspires students to build innovative solutions using modern technologies. It provides opportunities to explore development, participate in technical events, collaborate on projects, and improve practical skills.",
     members: "20+ Members",
     link: "/clubs/coding/google-developer",
   },
-  {
-    name: "Aerospace Club",
+  "Aerospace Club": {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRkTgjCRbmwcbOwTd8r2cWNeiwUjj7KxjXYVNYBd-P0g&s",
-    description:
-      "Aerospace Club brings together curious minds interested in aviation, space exploration, aerodynamics, and aerospace technology. It encourages innovation, experimentation, and learning beyond the classroom.",
+    description: "Aerospace Club brings together curious minds interested in aviation, space exploration, aerodynamics, and aerospace technology. It encourages innovation, experimentation, and learning beyond the classroom.",
     members: "20+ Members",
     link: "/clubs/coding/aerospace",
   },
-];
+};
 
 export default function CodingClub() {
+  const [teams, setTeams] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/clubs/4/teams")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch Coding Club teams");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const updatedTeams = data
+          .map((backendTeam) => {
+            const details = teamDetails[backendTeam.name];
+
+            if (!details) return null;
+
+            return {
+              ...details,
+              id: backendTeam.id,
+              name: backendTeam.name,
+            };
+          })
+          .filter(Boolean);
+
+        setTeams(updatedTeams);
+      })
+      .catch((error) => console.error(error));
+  }, []);
   return (
     <div className="coding-page">
 

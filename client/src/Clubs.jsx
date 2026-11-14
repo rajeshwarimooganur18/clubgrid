@@ -1,46 +1,45 @@
 
+import { useEffect, useState } from 'react';
 import './Clubs.css';
 
-const clubs = [
-  {
-    name: 'Coding Club',
-    category: 'Technical',
-    icon: '💻',
-    description: 'Learn programming, solve coding challenges, and build projects together.',
-  },
-  {
-    name: 'Robotics Club',
-    category: 'Technical',
-    icon: '🤖',
-    description: 'Explore robotics, electronics, automation, and innovative ideas.',
-  },
-  {
-    name: 'Music Club',
-    category: 'Cultural',
-    icon: '🎵',
-    description: 'Share your musical talent through singing, instruments, and performances.',
-  },
-  {
-    name: 'Dance Club',
-    category: 'Cultural',
-    icon: '💃',
-    description: 'Express yourself through dance, practice, and campus performances.',
-  },
-  {
-    name: 'Sports Club',
-    category: 'Sports',
-    icon: '⚽',
-    description: 'Participate in sports, improve your fitness, and build team spirit.',
-  },
-  {
-    name: 'Photography Club',
-    category: 'Creative',
-    icon: '📸',
-    description: 'Capture moments, learn photography skills, and share your creativity.',
-  },
-];
+const clubIcons = {
+  'Drama Club': '🎭',
+  'Dance Club': '💃',
+  'Music Club': '🎵',
+  'Coding Club': '💻',
+};
+
+const clubCategories = {
+  'Drama Club': 'Cultural',
+  'Dance Club': 'Cultural',
+  'Music Club': 'Cultural',
+  'Coding Club': 'Technical',
+};
 
 function Clubs() {
+  const [clubs, setClubs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/clubs')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch clubs');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setClubs(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching clubs:', error);
+        setError('Unable to load clubs. Please try again.');
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div className="clubs-page">
       <header className="clubs-header">
@@ -55,22 +54,36 @@ function Clubs() {
       </section>
 
       <section className="clubs-list">
-        {clubs.map((club) => (
-          <article className="club-item" key={club.name}>
-            <div className="club-icon">{club.icon}</div>
-            <span className="club-category">{club.category}</span>
+
+        {loading && <p>Loading clubs...</p>}
+
+        {error && <p>{error}</p>}
+
+        {!loading && !error && clubs.map((club) => (
+          <article className="club-item" key={club.id}>
+            <div className="club-icon">
+              {clubIcons[club.name] || '🎯'}
+            </div>
+
+            <span className="club-category">
+              {clubCategories[club.name] || club.category}
+            </span>
+
             <h2>{club.name}</h2>
             <p>{club.description}</p>
-            
-<button
-  className="club-join-button"
-  onClick={() => window.location.href = `/application?club=${encodeURIComponent(club.name)}`}
->
-  Apply Now →
-</button>
 
+            <button
+              className="club-join-button"
+              onClick={() =>
+                window.location.href =
+                  `/application?club=${encodeURIComponent(club.name)}`
+              }
+            >
+              Apply Now →
+            </button>
           </article>
         ))}
+
       </section>
 
       <footer className="clubs-footer">

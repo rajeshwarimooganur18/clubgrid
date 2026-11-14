@@ -1,57 +1,82 @@
-import { Link } from "react-router-dom";
 
-const teams = [
-  {
-    name: "Antaranga",
+import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+
+const teamDetails = {
+  Antaranga: {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDWHYJoQIpzCqL_tIDbi_ahlz6j3kJ0ovudEr5_pcHiA&s=10",
-    description:
-      "Antaranga celebrates the beauty of dance, culture, and artistic expression. It brings students together through energetic performances, traditional movements, and creative choreography.",
+    description: "Antaranga celebrates the beauty of dance, culture, and artistic expression. It brings students together through energetic performances, traditional movements, and creative choreography.",
     members: "20+ Members",
     link: "/clubs/dance/antaranga",
   },
-  {
-    name: "Diversity",
-    image : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmwYEeeRfG8hMlntg8rdIGZmvaBRivv6vJJyXi-bocrw&s=10",
-    description:
-      "Diversity brings together different dance styles, cultures, and expressions. It provides students a platform to explore their creativity, showcase their talents, and celebrate the art of movement.",
+  Diversity: {
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmwYEeeRfG8hMlntg8rdIGZmvaBRivv6vJJyXi-bocrw&s=10",
+    description: "Diversity brings together different dance styles, cultures, and expressions. It provides students a platform to explore their creativity, showcase their talents, and celebrate the art of movement.",
     members: "20+ Members",
     link: "/clubs/dance/diversity",
   },
-  {
-    name: "Alphas",
+  Alphas: {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQIRjU6Dxa9WHNDaKqzgXmQY_2cX19bBebZsijGAaUNQ&s=10",
-    description:
-      "Alphas is a passionate dance team that brings energy, coordination, and creativity to every performance. The team encourages students to develop their dancing skills and express themselves through movement.",
+    description: "Alphas is a passionate dance team that brings energy, coordination, and creativity to every performance. The team encourages students to develop their dancing skills and express themselves through movement.",
     members: "20+ Members",
     link: "/clubs/dance/alphas",
   },
-  {
-    name: "Intensity",
+  Intensity: {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQEROpy1I2oBE3pVmonDopp14_-rDuilLO6mFSd9tX3Hw&s",
-    description:
-      "Intensity is all about powerful performances, energetic choreography, and stage presence. The team gives passionate dancers an opportunity to challenge themselves and shine on stage.",
+    description: "Intensity is all about powerful performances, energetic choreography, and stage presence. The team gives passionate dancers an opportunity to challenge themselves and shine on stage.",
     members: "20+ Members",
     link: "/clubs/dance/intensity",
   },
-  {
-    name: "Dmax",
+  Dmax: {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI3GeQE8DiZdMdBbULHGwM63fXHlvHJaxSvl5erj75Vg&s=10",
-    description:
-      "Discover another talented Dance Club team, bringing together passionate performers who express their creativity through dance.",
+    description: "Discover another talented Dance Club team, bringing together passionate performers who express their creativity through dance.",
     members: "20+ Members",
     link: "/clubs/dance/dmax",
   },
-  {
-    name: "Tushan",
+  Tashan: {
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpPiHd_t4shas6cLygwgDPgbNzDRUfpbgi9LY2GvuSXw&s=10",
-    description:
-      "A creative space for dancers to learn, collaborate, explore different dance forms, and showcase their passion through performances.",
+    description: "A creative space for dancers to learn, collaborate, explore different dance forms, and showcase their passion through performances.",
     members: "20+ Members",
     link: "/clubs/dance/tashan",
   },
-];
+};
+
 
 export default function DanceClub() {
+  const [teams, setTeams] = useState([]);
+
+useEffect(() => {
+  fetch("http://localhost:5000/api/clubs/2/teams")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to fetch Dance Club teams");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      const updatedTeams = data
+        .map((backendTeam) => {
+          const displayName =
+            backendTeam.name === "AntarangaD"
+              ? "Antaranga"
+              : backendTeam.name;
+
+          const details = teamDetails[displayName];
+
+          if (!details) return null;
+
+          return {
+            ...details,
+            id: backendTeam.id,
+            name: displayName,
+          };
+        })
+        .filter(Boolean);
+
+      setTeams(updatedTeams);
+    })
+    .catch((error) => console.error(error));
+}, []);
   return (
     <div className="dance-page">
 

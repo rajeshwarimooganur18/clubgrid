@@ -1,5 +1,5 @@
+
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import "./Pratibimb.css";
 
 const achievements = [
@@ -26,6 +26,7 @@ const achievements = [
 export default function Pratibimb() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [showApplication, setShowApplication] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,8 +36,6 @@ export default function Pratibimb() {
     reason: "",
   });
 
-  const navigate = useNavigate();
-
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -44,23 +43,62 @@ export default function Pratibimb() {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Submit application to backend
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Connect this to your backend when ready.
-    console.log("PratiBimb Application:", formData);
+    if (submitting) return;
 
-    alert("Your application has been submitted successfully!");
+    setSubmitting(true);
 
-    setShowApplication(false);
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/applications",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            usn: formData.usn,
+            department: formData.department,
+            year: formData.year,
+            reason: formData.reason,
+            clubName: "Drama Club",
+            teamName: "Pratibimb",
+          }),
+        }
+      );
 
-    setFormData({
-      name: "",
-      usn: "",
-      department: "",
-      year: "",
-      reason: "",
-    });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Submission failed.");
+      }
+
+      alert("Your application has been submitted successfully!");
+
+      setShowApplication(false);
+
+      setFormData({
+        name: "",
+        usn: "",
+        department: "",
+        year: "",
+        reason: "",
+      });
+
+    } catch (error) {
+      console.error("Application submission error:", error);
+
+      alert(
+        error.message || "Something went wrong. Please try again."
+      );
+
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -88,7 +126,11 @@ export default function Pratibimb() {
           <a href="/announcements">Announcement</a>
         </nav>
 
-        <a href="/login" className="prati-profile" aria-label="Profile">
+        <a
+          href="/login"
+          className="prati-profile"
+          aria-label="Profile"
+        >
           <span>B</span>
           <span className="prati-profile-arrow">▾</span>
         </a>
@@ -116,10 +158,11 @@ export default function Pratibimb() {
             <h1>About PratiBimb</h1>
 
             <p>
-              Pratibimb is SDMCET’s Hindi dramatics club, established in 2009.
-              It brings stories to life through street plays, mad ads, and
-              skits, providing students a platform to express their creativity
-              and showcase their acting talents.
+              Pratibimb is SDMCET’s Hindi dramatics club, established
+              in 2009. It brings stories to life through street plays,
+              mad ads, and skits, providing students a platform to
+              express their creativity and showcase their acting
+              talents.
             </p>
           </div>
 
@@ -158,10 +201,15 @@ export default function Pratibimb() {
 
               <div className="prati-achievement-list">
                 {achievements.map((item) => (
-                  <div className="prati-achievement-row" key={item.year}>
+                  <div
+                    className="prati-achievement-row"
+                    key={item.year}
+                  >
                     <span className="prati-trophy">🏆</span>
 
-                    <span className="prati-year">{item.year}</span>
+                    <span className="prati-year">
+                      {item.year}
+                    </span>
 
                     <div className="prati-achievement-text">
                       <h3>{item.title}</h3>
@@ -189,7 +237,9 @@ export default function Pratibimb() {
                     <p>Prof. A.K.Desai</p>
                   </div>
 
-                  <span className="prati-coordinator-year">2018</span>
+                  <span className="prati-coordinator-year">
+                    2018
+                  </span>
                 </div>
               </article>
 
@@ -201,8 +251,9 @@ export default function Pratibimb() {
                 </h2>
 
                 <p>
-                  Ready to step into the spotlight? Take your first step with
-                  Pratibimb and let your passion for drama shine!
+                  Ready to step into the spotlight? Take your first
+                  step with Pratibimb and let your passion for drama
+                  shine!
                 </p>
 
                 <button
@@ -219,8 +270,16 @@ export default function Pratibimb() {
         ) : (
           <section className="prati-panel prati-gallery">
             <h2>Gallary</h2>
-            <img src="/pratibimb.png" alt="PratiBimb logo" />
-            <img src="/drama-banner.png" alt="PratiBimb theatre masks" />
+
+            <img
+              src="/pratibimb.png"
+              alt="PratiBimb logo"
+            />
+
+            <img
+              src="/drama-banner.png"
+              alt="PratiBimb theatre masks"
+            />
           </section>
         )}
       </main>
@@ -230,7 +289,7 @@ export default function Pratibimb() {
         <div
           className="prati-modal-overlay"
           onClick={(e) => {
-            if (e.target === e.currentTarget) {
+            if (e.target === e.currentTarget && !submitting) {
               setShowApplication(false);
             }
           }}
@@ -263,6 +322,7 @@ export default function Pratibimb() {
                 className="prati-modal-close"
                 onClick={() => setShowApplication(false)}
                 aria-label="Close application"
+                disabled={submitting}
               >
                 ×
               </button>
@@ -275,7 +335,10 @@ export default function Pratibimb() {
             >
 
               <div className="prati-form-group">
-                <label htmlFor="prati-name">Full Name</label>
+                <label htmlFor="prati-name">
+                  Full Name
+                </label>
+
                 <input
                   id="prati-name"
                   type="text"
@@ -288,7 +351,10 @@ export default function Pratibimb() {
               </div>
 
               <div className="prati-form-group">
-                <label htmlFor="prati-usn">USN</label>
+                <label htmlFor="prati-usn">
+                  USN
+                </label>
+
                 <input
                   id="prati-usn"
                   type="text"
@@ -301,6 +367,7 @@ export default function Pratibimb() {
               </div>
 
               <div className="prati-form-row">
+
                 <div className="prati-form-group">
                   <label htmlFor="prati-department">
                     Department
@@ -313,7 +380,10 @@ export default function Pratibimb() {
                     onChange={handleChange}
                     required
                   >
-                    <option value="">Select department</option>
+                    <option value="">
+                      Select department
+                    </option>
+
                     <option value="ISE">ISE</option>
                     <option value="CSE">CSE</option>
                     <option value="ECE">ECE</option>
@@ -335,13 +405,17 @@ export default function Pratibimb() {
                     onChange={handleChange}
                     required
                   >
-                    <option value="">Select year</option>
+                    <option value="">
+                      Select year
+                    </option>
+
                     <option value="1st Year">1st Year</option>
                     <option value="2nd Year">2nd Year</option>
                     <option value="3rd Year">3rd Year</option>
                     <option value="4th Year">4th Year</option>
                   </select>
                 </div>
+
               </div>
 
               <div className="prati-form-group">
@@ -366,6 +440,7 @@ export default function Pratibimb() {
                   type="button"
                   className="prati-cancel-button"
                   onClick={() => setShowApplication(false)}
+                  disabled={submitting}
                 >
                   Cancel
                 </button>
@@ -373,8 +448,11 @@ export default function Pratibimb() {
                 <button
                   type="submit"
                   className="prati-submit-button"
+                  disabled={submitting}
                 >
-                  Submit Application <span>→</span>
+                  {submitting
+                    ? "Submitting..."
+                    : "Submit Application"}
                 </button>
               </div>
 
