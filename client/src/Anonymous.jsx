@@ -64,15 +64,15 @@ export default function Anonymous() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/anonymous.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFFjQZrlg6KJBt-IrQGUews1Yp-wv1H2HR7bY_Z1ks5Q&s=10"
           alt="Anonymous logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/anonymous-banner.png"
+          src="https://i.pinimg.com/1200x/19/ce/58/19ce58c4d49883197ed1b2dac5108079.jpg"
           alt="Anonymous banner"
         />
       </section>

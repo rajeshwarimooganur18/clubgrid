@@ -54,8 +54,8 @@ export default function AntarangaD() {
       {/* HERO */}
       <section className="antaranga-hero">
         <div className="antaranga-hero-logo">
-          <img
-            src="/antaranga-dance.png"
+          <img style={{width:""}}
+            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDWHYJoQIpzCqL_tIDbi_ahlz6j3kJ0ovudEr5_pcHiA&s=10"
             alt="Antaranga Logo"
             onError={(e) => {
               e.currentTarget.style.display = "none";

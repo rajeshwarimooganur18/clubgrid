@@ -63,15 +63,15 @@ export default function Finearts() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/finearts.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTGqomeqdTNJnjHlBpptMymthezcmgHewSQ0TGycrACcQ&s"
           alt="Finearts logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/finearts-banner.png"
+          src="https://i.pinimg.com/736x/59/23/d5/5923d5cd34aa937249940382cc3f8e9f.jpg"
           alt="Finearts banner"
         />
       </section>

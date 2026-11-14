@@ -64,15 +64,15 @@ export default function QwertyIO() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/qwerty.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQld7GFR1LpIINM8eC5UEHe0qnyo_Yd5oFivMocgc2hVA&s=10"
           alt="QWERTY.I/O logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/qwerty-banner.png"
+          src="https://i.pinimg.com/1200x/19/ce/58/19ce58c4d49883197ed1b2dac5108079.jpg"
           alt="QWERTY.I/O banner"
         />
       </section>

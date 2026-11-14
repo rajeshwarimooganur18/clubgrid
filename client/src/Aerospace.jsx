@@ -67,15 +67,15 @@ export default function Aerospace() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/aerospace.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRRkTgjCRbmwcbOwTd8r2cWNeiwUjj7KxjXYVNYBd-P0g&s"
           alt="Aerospace Club Logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/aerospace-banner.png"
+          src="https://i.pinimg.com/1200x/19/ce/58/19ce58c4d49883197ed1b2dac5108079.jpg"
           alt="Aerospace Club Banner"
         />
       </section>

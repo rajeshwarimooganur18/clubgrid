@@ -26,7 +26,7 @@ const teamDetails = {
     description:
       "Astitva is one of the creative teams of the Drama Club, providing students a platform to express their talents through theatre and performances.",
     members: "20+ Members",
-    link: "/clubs/drama/antaranga",
+    link: "/clubs/drama/astitva",
   },
 };
 

@@ -64,15 +64,15 @@ export default function GDG() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/gdg.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSj6MAoH6o6WifnIFq1AnXcAOAWgbElOPqoybe8sZhAuQ&s"
           alt="Google Developer Group logo"
         />
-
-        <img
+ 
+        <img style={{width:"1500px "}}
           className="prati-hero-banner"
-          src="/gdg-banner.png"
+          src="https://i.pinimg.com/1200x/19/ce/58/19ce58c4d49883197ed1b2dac5108079.jpg"
           alt="Google Developer Group banner"
         />
       </section>

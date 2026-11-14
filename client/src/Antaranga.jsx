@@ -47,8 +47,8 @@ export default function Antaranga() {
       </header>
 
       <section className="prati-hero">
-        <img className="prati-hero-logo" src="/antaranga.png" alt="Antaranga logo" />
-        <img className="prati-hero-banner" src="/drama-banner.png" alt="Antaranga drama club banner" />
+        <img style={{width:"250px"}} className="prati-hero-logo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTRKQgBSW6_F5E3Birg-517VBXMq2bHiAc7lTHX576kj7fhPxfkhtg84WC&s=10" alt="Antaranga logo" />
+        <img style={{width:"1500px"}} className="prati-hero-banner" src="https://i.pinimg.com/1200x/f0/06/00/f006006db1cd84abd389c29cc49b6cb4.jpg" alt="Antaranga drama club banner" />
       </section>
 
       <main className="prati-content">

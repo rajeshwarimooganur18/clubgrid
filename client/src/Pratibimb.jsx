@@ -138,15 +138,15 @@ export default function Pratibimb() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
           src="/pratibimb.png"
           alt="PratiBimb logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/drama-banner.png"
+          src="https://i.pinimg.com/1200x/f0/06/00/f006006db1cd84abd389c29cc49b6cb4.jpg"
           alt="Drama theatrical masks"
         />
       </section>
