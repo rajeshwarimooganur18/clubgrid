@@ -476,3 +476,40 @@ a {
     margin-top: 15px;
   }
 }
+/* Profile icon design */
+
+.cg-profile {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.cg-profile-circle {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #4779ed, #2549b8);
+  border: 2px solid #e5edff;
+
+  text-decoration: none;
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.cg-profile-circle:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(49, 92, 219, 0.25);
+}
+
+.cg-profile-arrow {
+  font-size: 13px;
+  color: #53627b;
+  cursor: pointer;
+}

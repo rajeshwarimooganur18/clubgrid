@@ -64,15 +64,15 @@ export default function Astitva() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
           src="/astitva.png"
           alt="Astitva logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/astitva-banner.png"
+          src="https://i.pinimg.com/1200x/f0/06/00/f006006db1cd84abd389c29cc49b6cb4.jpg"
           alt="Astitva banner"
         />
       </section>

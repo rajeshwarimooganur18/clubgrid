@@ -64,15 +64,15 @@ export default function AntarangaM() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/antarangam.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTRKQgBSW6_F5E3Birg-517VBXMq2bHiAc7lTHX576kj7fhPxfkhtg84WC&s=10"
           alt="AntarangaM logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/antarangam-banner.png"
+          src="https://i.pinimg.com/736x/59/23/d5/5923d5cd34aa937249940382cc3f8e9f.jpg"
           alt="AntarangaM banner"
         />
       </section>

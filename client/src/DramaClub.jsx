@@ -24,7 +24,7 @@ const teams = [
     description:
       "Antaranga celebrates Kannada culture through drama, music, dance, and creative initiatives, bringing students together to express their talents and promote social awareness.",
     members: "20+ Members",
-    link: "/clubs/drama/antaranga",
+    link: "/clubs/drama/astitva",
   },
 ];
 

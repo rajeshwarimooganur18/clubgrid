@@ -64,15 +64,15 @@ export default function Museart() {
 
       {/* HERO */}
       <section className="prati-hero">
-        <img
+        <img style={{width:"250px"}}
           className="prati-hero-logo"
-          src="/musearts.png"
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzphEUh1YzrbpB7aOtgCj91EFdzYXntGsXdrN4U5L_tqVBs8BfpWwKckFO&s=10"
           alt="Museart logo"
         />
 
-        <img
+        <img style={{width:"1500px"}}
           className="prati-hero-banner"
-          src="/musearts-banner.png"
+          src="https://i.pinimg.com/736x/59/23/d5/5923d5cd34aa937249940382cc3f8e9f.jpg"
           alt="Museart banner"
         />
       </section>

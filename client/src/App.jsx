@@ -2,13 +2,21 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./Login";
+// import Register from "./Register";
+import Profile from "./Profile";
+import Application from "./Application";
+import Events from "./Events";
+import Announcement from "./Annoucement";
 import Register from "./Register";
+import AdminDashboard from "./AdminDashboard";
 
+// DRAMA CLUB
 import DramaClub from "./DramaClub";
 import Pratibimb from "./Pratibimb";
 import Antaranga from "./Antaranga";
 import Astitva from "./Astitva";
 
+// DANCE CLUB
 import DanceClub from "./DanceClub";
 import Diversity from "./Diversity";
 import Intensity from "./Intensity";
@@ -30,6 +38,7 @@ import Anonymous from "./Anonymous";
 import QwertyIO from "./QwertyIO";
 import GDG from "./GDG";
 import Aerospace from "./Aerospace";
+
 const clubs = [
   {
     name: "Drama Club",
@@ -92,7 +101,7 @@ function Home() {
             Clubs
           </a>
 
-          <a href="/login">
+          <a href="/my-application">
             <span className="cg-nav-icon">▤</span>
             My Application
           </a>
@@ -109,16 +118,26 @@ function Home() {
         </nav>
 
         <div className="cg-profile">
-          <button
+          <a
+            href="/profile"
             className="cg-profile-circle"
-            type="button"
-            onClick={() => {
-              window.location.href = "/login";
-            }}
-            aria-label="Open login"
+            aria-label="Open My Profile"
+            title="My Profile"
           >
-            B
-          </button>
+            <svg
+              width="23"
+              height="23"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4.2 3.6-7 8-7s8 2.8 8 7" />
+            </svg>
+          </a>
 
           <span className="cg-profile-arrow">▾</span>
         </div>
@@ -143,9 +162,7 @@ function Home() {
             students, and make the most of your college journey
           </p>
 
-          <a href="#clubs" className="cg-explore-button">
-            Explore Clubs <span>→</span>
-          </a>
+         
         </div>
       </section>
 
@@ -208,116 +225,52 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
+        {/* PROFILE, APPLICATION, EVENTS AND ANNOUNCEMENTS */}
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/my-application" element={<Application />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/announcements" element={<Announcement />} />
+        <Route path="/admin" element={<AdminDashboard/>}/>
+
         {/* DRAMA CLUB */}
         <Route path="/clubs/drama" element={<DramaClub />} />
-
-        <Route
-          path="/clubs/drama/pratibimb"
-          element={<Pratibimb />}
-        />
-
-        <Route
-          path="/clubs/drama/antaranga"
-          element={<Antaranga />}
-        />
+        <Route path="/clubs/drama/pratibimb" element={<Pratibimb />} />
+        <Route path="/clubs/drama/antaranga" element={<Antaranga />} />
 
         {/* ASTITVA */}
-        <Route
-          path="/clubs/astitva"
-          element={<Astitva />}
-        />
+        <Route path="/clubs/drama/astitva" element={<Astitva />} />
 
         {/* DANCE CLUB */}
-        <Route
-          path="/clubs/dance"
-          element={<DanceClub />}
-        />
+        <Route path="/clubs/dance" element={<DanceClub />} />
 
         {/* DANCE TEAMS */}
-        <Route
-          path="/clubs/dance/diversity"
-          element={<Diversity />}
-        />
-
-        <Route
-          path="/clubs/dance/intensity"
-          element={<Intensity />}
-        />
-
-        <Route
-          path="/clubs/dance/alphas"
-          element={<Alphas />}
-        />
-
-        <Route
-          path="/clubs/dance/antaranga"
-          element={<AntarangaD />}
-        />
-
-        <Route
-          path="/clubs/dance/tashan"
-          element={<Tashan />}
-        />
-
-        <Route
-          path="/clubs/dance/dmax"
-          element={<Dmax />}
-        />
+        <Route path="/clubs/dance/diversity" element={<Diversity />} />
+        <Route path="/clubs/dance/intensity" element={<Intensity />} />
+        <Route path="/clubs/dance/alphas" element={<Alphas />} />
+        <Route path="/clubs/dance/antaranga" element={<AntarangaD />} />
+        <Route path="/clubs/dance/tashan" element={<Tashan />} />
+        <Route path="/clubs/dance/dmax" element={<Dmax />} />
 
         {/* MUSIC CLUB */}
-        <Route
-          path="/clubs/music"
-          element={<MusicClub />}
-        />
+        <Route path="/clubs/music" element={<MusicClub />} />
 
         {/* MUSIC TEAMS */}
-        <Route
-          path="/clubs/music/antarangam"
-          element={<AntarangaM />}
-        />
-
-        <Route
-          path="/clubs/music/finearts"
-          element={<Finearts />}
-        />
-
-        <Route
-          path="/clubs/music/musearts"
-          element={<Museart />}
-        />
-
-        <Route
-          path="/clubs/music/nadamrita"
-          element={<Nadamritaa />}
-        />
+        <Route path="/clubs/music/antarangam" element={<AntarangaM />} />
+        <Route path="/clubs/music/finearts" element={<Finearts />} />
+        <Route path="/clubs/music/musearts" element={<Museart />} />
+        <Route path="/clubs/music/nadamrita" element={<Nadamritaa />} />
 
         {/* CODING CLUB */}
-        <Route
-          path="/clubs/coding"
-          element={<CodeClub />}
-        />
-         <Route
-          path="/clubs/coding/anonymous"
-          element={<Anonymous />}
-        />
-         <Route
-          path="/clubs/coding/qwerty"
-          element={<QwertyIO />}
-        />
-         <Route
-          path="/clubs/coding/google-developer"
-          element={<GDG />}
-        />
-         <Route
-          path="/clubs/coding/aerospace"
-          element={<Aerospace />}
-        />
+        <Route path="/clubs/coding" element={<CodeClub />} />
+
+        {/* CODING TEAMS */}
+        <Route path="/clubs/coding/anonymous" element={<Anonymous />} />
+        <Route path="/clubs/coding/qwerty" element={<QwertyIO />} />
+        <Route path="/clubs/coding/google-developer" element={<GDG />} />
+        <Route path="/clubs/coding/aerospace" element={<Aerospace />} />
 
         {/* UNKNOWN ROUTES */}
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
+        <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
     </BrowserRouter>
