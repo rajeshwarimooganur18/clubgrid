@@ -1,14 +1,20 @@
 import "./App.css";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { clubsAPI } from "./api";
 
 import Login from "./Login";
+import ForgotPassword from "./ForgotPassword";
 // import Register from "./Register";
 import Profile from "./Profile";
 import Application from "./Application";
+import MyApplications from "./MyApplications";
 import Events from "./Events";
 import Announcement from "./Annoucement";
 import Register from "./Register";
 import AdminDashboard from "./AdminDashboard";
+import ProtectedAdminRoute from "./ProtectedAdminRoute";
+import SessionGate from "./SessionGate";
 
 // DRAMA CLUB
 import DramaClub from "./DramaClub";
@@ -75,6 +81,54 @@ const clubs = [
 ];
 
 function Home() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [teams, setTeams] = useState([]);
+  const [teamsLoading, setTeamsLoading] = useState(true);
+  const [teamsError, setTeamsError] = useState("");
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+  const filteredTeams = teams.filter((team) =>
+    team.name.toLowerCase().includes(normalizedSearchTerm)
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    clubsAPI.getAll()
+      .then((clubData) => {
+        if (!Array.isArray(clubData)) {
+          throw new Error("Invalid clubs response");
+        }
+
+        const clubTeams = clubData.flatMap((club) =>
+          (Array.isArray(club.teams) ? club.teams : []).map((team) => ({
+            ...team,
+            clubId: club.clubId,
+            clubName: club.name,
+            clubImage: club.image,
+            clubIcon: club.icon,
+            clubCategory: club.category,
+            clubMembers: club.members,
+          }))
+        );
+
+        if (isMounted) {
+          setTeams(clubTeams);
+          setTeamsLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching teams:", error);
+        if (isMounted) {
+          setTeamsError("Unable to load teams. Please try again.");
+          setTeamsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <div className="clubgrid-page">
 
@@ -101,9 +155,9 @@ function Home() {
             Clubs
           </a>
 
-          <a href="/my-application">
+          <a href="/my-applications">
             <span className="cg-nav-icon">▤</span>
-            My Application
+            My Applications
           </a>
 
           <a href="/events">
@@ -172,38 +226,83 @@ function Home() {
           Clubs to Explore <span>→</span>
         </h2>
 
+        <input
+          className="cg-clubs-search"
+          type="search"
+          aria-label="Search teams by name"
+          placeholder="Search teams..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+
         <div className="cg-clubs-grid">
-          {clubs.map((club) => (
-            <article className="cg-club-card" key={club.name}>
+          {!normalizedSearchTerm ? (
+            clubs.map((club) => (
+              <article className="cg-club-card" key={club.name}>
+                <div className="cg-club-image">
+                  <img src={club.image} alt={club.name} />
+                  <div className="cg-club-icon">{club.icon}</div>
+                </div>
+
+                <div className="cg-club-information">
+                  <h3>{club.name}</h3>
+
+                  <div className="cg-club-meta">
+                    <span>{club.members}</span>
+                    <span>{club.category}</span>
+                  </div>
+
+                  <a
+                    href={
+                      club.name === "Drama Club"
+                        ? "/clubs/drama"
+                        : club.name === "Dance Club"
+                        ? "/clubs/dance"
+                        : club.name === "Music Club"
+                        ? "/clubs/music"
+                        : club.name === "Coding Club"
+                        ? "/clubs/coding"
+                        : `/login?club=${encodeURIComponent(club.name)}`
+                    }
+                    className="cg-view-details"
+                  >
+                    View Details <span>→</span>
+                  </a>
+                </div>
+              </article>
+            ))
+          ) : teamsLoading ? (
+            <p className="cg-empty-state">Loading teams...</p>
+          ) : teamsError ? (
+            <p className="cg-empty-state">{teamsError}</p>
+          ) : filteredTeams.length === 0 ? (
+            <p className="cg-empty-state">No teams found</p>
+          ) : filteredTeams.map((team) => (
+            <article
+              className="cg-club-card"
+              key={`${team.clubId}-${team.id}`}
+            >
               <div className="cg-club-image">
-                <img src={club.image} alt={club.name} />
-                <div className="cg-club-icon">{club.icon}</div>
+                <img
+                  src={team.logo || team.clubImage}
+                  alt={`${team.name} team`}
+                />
+                <div className="cg-club-icon">{team.clubIcon}</div>
               </div>
 
               <div className="cg-club-information">
-                <h3>{club.name}</h3>
+                <h3>{team.name}</h3>
 
                 <div className="cg-club-meta">
-                  <span>{club.members}</span>
-                  <span>{club.category}</span>
+                  <span>{team.clubName}</span>
+                  <span>{team.clubCategory}</span>
                 </div>
 
-                <a
-                  href={
-                    club.name === "Drama Club"
-                      ? "/clubs/drama"
-                      : club.name === "Dance Club"
-                      ? "/clubs/dance"
-                      : club.name === "Music Club"
-                      ? "/clubs/music"
-                      : club.name === "Coding Club"
-                      ? "/clubs/coding"
-                      : `/login?club=${encodeURIComponent(club.name)}`
-                  }
-                  className="cg-view-details"
-                >
-                  View Details <span>→</span>
-                </a>
+                {team.path && (
+                  <a href={team.path} className="cg-view-details">
+                    View Details <span>→</span>
+                  </a>
+                )}
               </div>
             </article>
           ))}
@@ -219,18 +318,48 @@ function App() {
       <Routes>
 
         {/* HOME */}
-        <Route path="/" element={<Home />} />
+        <Route
+          path="/"
+          element={
+            <SessionGate unauthenticated={<Register />}>
+              <Home />
+            </SessionGate>
+          }
+        />
 
         {/* LOGIN AND REGISTER */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/login"
+          element={
+            <SessionGate unauthenticated={<Login />} redirectAuthenticated>
+              <Login />
+            </SessionGate>
+          }
+        />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/register"
+          element={
+            <SessionGate unauthenticated={<Register />} redirectAuthenticated>
+              <Register />
+            </SessionGate>
+          }
+        />
 
         {/* PROFILE, APPLICATION, EVENTS AND ANNOUNCEMENTS */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/my-application" element={<Application />} />
+        <Route path="/my-applications" element={<MyApplications />} />
         <Route path="/events" element={<Events />} />
         <Route path="/announcements" element={<Announcement />} />
-        <Route path="/admin" element={<AdminDashboard/>}/>
+        <Route
+          path="/admin"
+          element={
+            <ProtectedAdminRoute>
+              <AdminDashboard />
+            </ProtectedAdminRoute>
+          }
+        />
 
         {/* DRAMA CLUB */}
         <Route path="/clubs/drama" element={<DramaClub />} />

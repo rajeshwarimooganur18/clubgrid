@@ -1,0 +1,183 @@
+
+.application-page {
+  min-height: 100vh;
+  background: #f8f7ff;
+  color: #25244b;
+  font-family: Arial, sans-serif;
+}
+
+.application-header {
+  padding: 22px 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-bottom: 1px solid #eae8f5;
+}
+
+.application-logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #25244b;
+  text-decoration: none;
+}
+
+.application-logo span {
+  color: #7964ee;
+}
+
+.application-back {
+  text-decoration: none;
+  color: #6d5adb;
+  font-weight: bold;
+}
+
+.application-back:hover {
+  color: #4936b4;
+}
+
+.application-container {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: 45px 20px 65px;
+}
+
+.application-heading {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.application-label {
+  color: #7964ee;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 2px;
+}
+
+.application-heading h1 {
+  font-size: 36px;
+  margin: 12px 0;
+}
+
+.application-heading > p:last-child {
+  color: #707087;
+  line-height: 1.6;
+}
+
+.application-form {
+  background: white;
+  padding: 32px;
+  border: 1px solid #eeebf8;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px #29244b08;
+  display: flex;
+  flex-direction: column;
+}
+
+.application-form label {
+  font-weight: bold;
+  font-size: 14px;
+  margin: 18px 0 8px;
+}
+
+.application-form input,
+.application-form select,
+.application-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid #dcd9eb;
+  border-radius: 8px;
+  background: white;
+  color: #25244b;
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.application-form input:focus,
+.application-form select:focus,
+.application-form textarea:focus {
+  outline: none;
+  border-color: #7964ee;
+  box-shadow: 0 0 0 3px #7964ee20;
+}
+
+.application-form input[readonly] {
+  background: #f5f3fc;
+  color: #66627e;
+  cursor: not-allowed;
+}
+
+.application-form select:disabled {
+  background: #f2f0f8;
+  color: #9995a8;
+  cursor: not-allowed;
+}
+
+.application-form textarea {
+  resize: vertical;
+  min-height: 85px;
+}
+
+.application-submit {
+  margin-top: 28px;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  background: #7964ee;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.application-submit:hover:not(:disabled) {
+  background: #6350d0;
+  transform: translateY(-2px);
+}
+
+.application-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.application-form [role="status"] {
+  padding: 12px 15px;
+  margin: 18px 0 0;
+  border-radius: 8px;
+  background: #f0edff;
+  color: #5945bd;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.application-note {
+  color: #707087;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+@media (max-width: 520px) {
+  .application-header {
+    padding: 18px 5%;
+  }
+
+  .application-logo {
+    font-size: 23px;
+  }
+
+  .application-container {
+    padding: 30px 15px 45px;
+  }
+
+  .application-form {
+    padding: 22px;
+  }
+
+  .application-heading h1 {
+    font-size: 30px;
+  }
+}

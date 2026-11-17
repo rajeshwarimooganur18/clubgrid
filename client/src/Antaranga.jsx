@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { authAPI, submitTeamApplication } from "./api";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Antaranga() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [showApplication, setShowApplication] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     usn: "",
@@ -12,17 +15,60 @@ export default function Antaranga() {
     reason: "",
   });
 
+  useEffect(() => {
+    let active = true;
+
+    authAPI.getProfile()
+      .then((data) => {
+        if (!active) return;
+        if (!data.student) {
+          setProfileError("Unable to load your profile. Please try again.");
+          return;
+        }
+
+        setFormData((current) => ({
+          ...current,
+          name: data.student.fullName || "",
+          usn: data.student.studentId || "",
+          department: data.student.department || "",
+          year: data.student.year || "",
+        }));
+        setProfileLoaded(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProfileError(
+          error.status === 401
+            ? "Please log in before applying."
+            : "Unable to load your profile. Please try again."
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    console.log("Antaranga Application:", formData);
-    alert("Your application has been submitted successfully!");
-    setShowApplication(false);
-    setFormData({ name: "", usn: "", department: "", year: "", reason: "" });
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+      if (!profileLoaded) {
+        alert(profileError || "Please wait for your profile to load before applying.");
+        return;
+      }
+
+    try {
+      await submitTeamApplication(formData, "Drama Club", "Antaranga");
+      alert("Your application to Antaranga has been submitted successfully! You can track its status under 'My Application'.");
+      setShowApplication(false);
+      setFormData((current) => ({ ...current, reason: "" }));
+    } catch (err) {
+      alert(err.message || "Failed to submit application. Please try again.");
+    }
   };
 
   return (
@@ -36,7 +82,7 @@ export default function Antaranga() {
         <nav className="prati-nav">
           <Link to="/">⌂ &nbsp;Home</Link>
           <Link to="/clubs/drama" className="prati-nav-active">♧ &nbsp;Clubs</Link>
-          <Link to="/login">▤ &nbsp;My Application</Link>
+          <Link to="/my-applications">▤ &nbsp;My Applications</Link>
           <Link to="/events">▣ &nbsp;Events</Link>
           <Link to="/announcements">⚑ &nbsp;Announcement</Link>
         </nav>
@@ -156,29 +202,21 @@ export default function Antaranga() {
             <form className="prati-application-form" onSubmit={handleSubmit}>
               <div className="prati-form-group">
                 <label htmlFor="antaranga-name">Full Name</label>
-                <input id="antaranga-name" name="name" value={formData.name} onChange={handleChange} placeholder="Enter your full name" required />
+                <input id="antaranga-name" name="name" value={formData.name} readOnly onChange={handleChange} placeholder="Enter your full name" required />
               </div>
               <div className="prati-form-row">
                 <div className="prati-form-group">
                   <label htmlFor="antaranga-usn">USN</label>
-                  <input id="antaranga-usn" name="usn" value={formData.usn} onChange={handleChange} placeholder="Enter your USN" required />
+                  <input id="antaranga-usn" name="usn" value={formData.usn} readOnly onChange={handleChange} placeholder="Enter your USN" required />
                 </div>
                 <div className="prati-form-group">
                   <label htmlFor="antaranga-department">Department</label>
-                  <select id="antaranga-department" name="department" value={formData.department} onChange={handleChange} required>
-                    <option value="">Select department</option>
-                    <option>ISE</option><option>CSE</option><option>ECE</option>
-                    <option>EEE</option><option>ME</option><option>CE</option>
-                  </select>
+                  <input id="antaranga-department" type="text" name="department" value={formData.department} readOnly required />
                 </div>
               </div>
               <div className="prati-form-group">
                 <label htmlFor="antaranga-year">Academic Year</label>
-                <select id="antaranga-year" name="year" value={formData.year} onChange={handleChange} required>
-                  <option value="">Select academic year</option>
-                  <option>1st Year</option><option>2nd Year</option>
-                  <option>3rd Year</option><option>4th Year</option>
-                </select>
+                <input id="antaranga-year" type="text" name="year" value={formData.year} readOnly required />
               </div>
               <div className="prati-form-group">
                 <label htmlFor="antaranga-reason">Why do you want to join Antaranga?</label>
@@ -186,7 +224,8 @@ export default function Antaranga() {
               </div>
               <div className="prati-modal-footer">
                 <button type="button" className="prati-cancel-button" onClick={() => setShowApplication(false)}>Cancel</button>
-                <button type="submit" className="prati-submit-button">Submit Application</button>
+                {!profileLoaded && <p role={profileError ? "alert" : "status"}>{profileError || "Loading your profile..."}</p>}
+                <button type="submit" className="prati-submit-button" disabled={!profileLoaded}>Submit Application</button>
               </div>
               <p className="prati-modal-note">Your details will be used only for the club application.</p>
             </form>

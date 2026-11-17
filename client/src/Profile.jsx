@@ -1,23 +1,102 @@
-import React from "react";
+﻿import React, { useState, useEffect } from "react";
 import { Navigate, Link, useNavigate } from "react-router-dom";
+import { authAPI, applicationsAPI, getCurrentUser, setCurrentUser, logout } from "./api";
 
 function Profile() {
   const navigate = useNavigate();
+  const initialUser = getCurrentUser();
 
-  const student = JSON.parse(
-    localStorage.getItem("clubgridUser") || "null"
-  );
+  const [student, setStudent] = useState(initialUser);
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    fullName: initialUser ? initialUser.fullName || initialUser.name || "" : "",
+    department: initialUser ? initialUser.department || "" : "",
+    year: initialUser ? initialUser.year || "" : "",
+    studentId: initialUser ? initialUser.studentId || initialUser.usn || "" : ""
+  });
+  const [saveMessage, setSaveMessage] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  if (!student || !student.loggedIn) {
+  useEffect(() => {
+    // Load fresh profile from backend
+    const loadProfileAndApps = async () => {
+      try {
+        const res = await authAPI.getProfile();
+        if (res && res.student) {
+          const updated = {
+            ...res.student,
+            name: res.student.fullName,
+            loggedIn: true
+          };
+          setStudent(updated);
+          setCurrentUser(updated);
+          setEditForm({
+            fullName: updated.fullName || "",
+            department: updated.department || "",
+            year: updated.year || "",
+            studentId: updated.studentId || ""
+          });
+        }
+      } catch (err) {
+        console.warn("Could not fetch remote profile:", err.message);
+      }
+
+      // Load student's applications
+      try {
+        const myApps = await applicationsAPI.getMy();
+        setApplications(myApps || []);
+      } catch (err) {
+        console.warn("Could not fetch user applications:", err.message);
+      }
+    };
+
+    if (initialUser && initialUser.loggedIn) {
+      loadProfileAndApps();
+    }
+  }, []);
+
+  if (!initialUser || !initialUser.loggedIn) {
     return <Navigate to="/login" replace />;
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("clubgridUser");
+    logout();
     navigate("/login");
   };
 
-  const displayName = (student.name || "Student")
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setSaveMessage("");
+    setSaveError("");
+    setSaving(true);
+
+    try {
+      const res = await authAPI.updateProfile(editForm);
+      if (res && res.student) {
+        const updated = {
+          ...res.student,
+          name: res.student.fullName,
+          loggedIn: true
+        };
+        setStudent(updated);
+        setCurrentUser(updated);
+        setSaveMessage("Profile updated successfully!");
+        setTimeout(() => {
+          setShowEditModal(false);
+          setSaveMessage("");
+        }, 1200);
+      }
+    } catch (err) {
+      setSaveError(err.message || "Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const displayName = (student?.name || student?.fullName || "Student")
     .split(" ")
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
@@ -32,17 +111,22 @@ function Profile() {
     {
       icon: "✉",
       label: "Email Address",
-      value: student.email || "Not provided",
+      value: student?.email || "Not provided",
     },
     {
       icon: "🎓",
       label: "Department",
-      value: student.department || "Not provided",
+      value: student?.department || "Not provided",
     },
     {
       icon: "📚",
       label: "Academic Year",
-      value: student.year || "Not provided",
+      value: student?.year || "Not provided",
+    },
+    {
+      icon: "🆔",
+      label: "Student ID / USN",
+      value: student?.studentId || "Not added yet",
     },
   ];
 
@@ -72,9 +156,9 @@ function Profile() {
             Clubs
           </Link>
 
-          <Link to="/my-application">
+          <Link to="/my-applications">
             <span className="cg-nav-icon">▤</span>
-            My Application
+            My Applications
           </Link>
 
           <Link to="/events">
@@ -83,7 +167,7 @@ function Profile() {
           </Link>
 
           <Link to="/announcements">
-            <span className="cg-nav-icon">⚑</span>
+            <span className="cg-nav-icon">⚐</span>
             Announcement
           </Link>
         </nav>
@@ -145,12 +229,12 @@ function Profile() {
             </h2>
 
             <p className="profile-email">
-              {student.email}
+              {student?.email}
             </p>
 
             <div className="profile-status">
               <span className="profile-status-dot"></span>
-              Active Student
+              Active {student?.role === 'admin' ? 'Administrator' : 'Student'}
             </div>
 
             <div className="profile-divider"></div>
@@ -162,7 +246,22 @@ function Profile() {
                 <p>Your registered student details</p>
               </div>
 
-              <span className="profile-section-icon">✦</span>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(true)}
+                style={{
+                  background: "#7953ed",
+                  color: "#fff",
+                  border: "none",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}
+              >
+                ✏️ Edit Profile
+              </button>
             </div>
 
             <div className="profile-details-grid">
@@ -186,6 +285,91 @@ function Profile() {
                 </div>
               ))}
             </div>
+
+            {/* MY APPLICATIONS PREVIEW */}
+            <div className="profile-divider"></div>
+
+            <div className="profile-section-heading">
+              <div>
+                <h3>My Club Applications ({applications.length})</h3>
+                <p>Status of applications submitted to college clubs</p>
+              </div>
+
+              <Link
+                to="/my-applications"
+                style={{
+                  color: "#7953ed",
+                  textDecoration: "none",
+                  fontSize: "13px",
+                  fontWeight: "700"
+                }}
+              >
+                View Details →
+              </Link>
+            </div>
+
+            {applications.length === 0 ? (
+              <div style={{
+                background: "#faf9ff",
+                border: "1px dashed #d1c8ef",
+                borderRadius: "10px",
+                padding: "24px",
+                textAlign: "center",
+                color: "#7b7788",
+                fontSize: "14px"
+              }}>
+                <p style={{ margin: "0 0 10px" }}>You have not submitted any club applications yet.</p>
+                <Link
+                  to="/#clubs"
+                  style={{
+                    color: "#7953ed",
+                    fontWeight: "700",
+                    textDecoration: "none"
+                  }}
+                >
+                  Explore Clubs to Apply →
+                </Link>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
+                {applications.slice(0, 3).map((app) => (
+                  <div
+                    key={app._id || app.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "14px 18px",
+                      background: "#faf9ff",
+                      border: "1px solid #efecf8",
+                      borderRadius: "10px"
+                    }}
+                  >
+                    <div>
+                      <strong style={{ fontSize: "15px", color: "#201d2c", display: "block" }}>
+                        {app.teamName} <span style={{ fontSize: "12px", color: "#888", fontWeight: "normal" }}>({app.clubName})</span>
+                      </strong>
+                      <span style={{ fontSize: "12px", color: "#9995a5" }}>
+                        Applied on {new Date(app.appliedOn || app.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </span>
+                    </div>
+
+                    <span
+                      style={{
+                        padding: "6px 14px",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                        fontWeight: "700",
+                        background: app.status === "Accepted" ? "#e5f8ec" : app.status === "Rejected" ? "#ffebeb" : "#fff4df",
+                        color: app.status === "Accepted" ? "#24894c" : app.status === "Rejected" ? "#cb4545" : "#b47a17"
+                      }}
+                    >
+                      ● {app.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* BUTTONS */}
             <div className="profile-buttons">
@@ -215,6 +399,140 @@ function Profile() {
 
       </main>
 
+      {/* EDIT PROFILE MODAL */}
+      {showEditModal && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          background: "rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: "20px",
+          boxSizing: "border-box"
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: "14px",
+            width: "100%",
+            maxWidth: "480px",
+            padding: "30px",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.2)"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+              <h2 style={{ margin: 0, fontSize: "20px", color: "#1f1d2b" }}>Edit Profile Details</h2>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                style={{ background: "none", border: "none", fontSize: "24px", cursor: "pointer", color: "#888" }}
+              >
+                ×
+              </button>
+            </div>
+
+            {saveError && (
+              <div style={{ background: "#ffebee", color: "#c62828", padding: "10px", borderRadius: "6px", marginBottom: "15px", fontSize: "13px" }}>
+                ⚠️ {saveError}
+              </div>
+            )}
+
+            {saveMessage && (
+              <div style={{ background: "#e8f5e9", color: "#2e7d32", padding: "10px", borderRadius: "6px", marginBottom: "15px", fontSize: "13px" }}>
+                ✅ {saveMessage}
+              </div>
+            )}
+
+            <form onSubmit={handleSaveProfile} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#444" }}>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editForm.fullName}
+                  onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+                  style={{ width: "100%", padding: "11px 14px", border: "1px solid #ddd", borderRadius: "8px", boxSizing: "border-box", fontSize: "14px" }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#444" }}>
+                  Department
+                </label>
+                <select
+                  required
+                  value={editForm.department}
+                  onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
+                  style={{ width: "100%", padding: "11px 14px", border: "1px solid #ddd", borderRadius: "8px", boxSizing: "border-box", fontSize: "14px" }}
+                >
+                  <option value="ISE">ISE</option>
+                  <option value="CSE">CSE</option>
+                  <option value="ECE">ECE</option>
+                  <option value="EEE">EEE</option>
+                  <option value="Mechanical">Mechanical</option>
+                  <option value="Civil">Civil</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#444" }}>
+                  Academic Year
+                </label>
+                <select
+                  required
+                  value={editForm.year}
+                  onChange={(e) => setEditForm({ ...editForm, year: e.target.value })}
+                  style={{ width: "100%", padding: "11px 14px", border: "1px solid #ddd", borderRadius: "8px", boxSizing: "border-box", fontSize: "14px" }}
+                >
+                  <option value="1st Year">1st Year</option>
+                  <option value="2nd Year">2nd Year</option>
+                  <option value="3rd Year">3rd Year</option>
+                  <option value="4th Year">4th Year</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "600", marginBottom: "6px", color: "#444" }}>
+                  USN
+                </label>
+                <input
+                  type="text"
+                  name="studentId"
+                  placeholder="Enter your USN"
+                  required
+                  value={editForm.studentId}
+                  onChange={(e) => setEditForm({ ...editForm, studentId: e.target.value })}
+                  style={{ width: "100%", padding: "11px 14px", border: "1px solid #ddd", borderRadius: "8px", boxSizing: "border-box", fontSize: "14px" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "10px" }}>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  style={{ padding: "10px 18px", border: "1px solid #ddd", borderRadius: "8px", background: "#fff", cursor: "pointer", fontWeight: "600" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  style={{ padding: "10px 20px", border: "none", borderRadius: "8px", background: "#7953ed", color: "#fff", cursor: "pointer", fontWeight: "600" }}
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* CSS */}
       <style>{`
 
@@ -243,101 +561,81 @@ function Profile() {
         .profile-eyebrow {
           color: #7953ed;
           font-size: 11px;
-          font-weight: 750;
           letter-spacing: 2px;
-          margin-bottom: 12px;
+          font-weight: 700;
+          margin: 0 0 8px;
         }
 
         .profile-heading h1 {
-          font-size: 36px;
-          font-weight: 750;
+          font-size: 38px;
+          font-weight: 800;
           letter-spacing: -1px;
           margin: 0 0 10px;
-          color: #171717;
+          color: #1e1b29;
         }
 
         .profile-heading h1 span {
           color: #7953ed;
         }
 
-        .profile-heading > p:last-child {
-          font-size: 14px;
-          color: #85838f;
+        .profile-heading p {
+          color: #8c8998;
+          font-size: 15px;
           margin: 0;
         }
 
-        /* PROFILE CARD */
+        /* CARD */
 
         .profile-card {
-          max-width: 780px;
-          margin: 0 auto;
-          background: white;
-          border: 1px solid #eeeef3;
-          border-radius: 17px;
+          background: #ffffff;
+          border: 1px solid #eae8f2;
+          border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 8px 30px rgba(30, 20, 70, 0.055);
+          box-shadow: 0 10px 30px rgba(45, 30, 80, 0.04);
         }
 
-        /* COVER */
-
         .profile-cover {
-          height: 145px;
-          background: linear-gradient(
-            115deg,
-            #30205e,
-            #6242b7,
-            #9274f2
-          );
+          height: 120px;
+          background: linear-gradient(135deg, #7953ed 0%, #a482ff 60%, #c4b5fd 100%);
           position: relative;
-          overflow: hidden;
         }
 
         .profile-cover-decoration {
           position: absolute;
-          width: 260px;
-          height: 260px;
-          border: 1px solid rgba(255,255,255,0.14);
-          border-radius: 50%;
-          right: 10%;
-          top: -125px;
-          box-shadow:
-            0 0 0 30px rgba(255,255,255,0.045),
-            0 0 0 65px rgba(255,255,255,0.035);
+          inset: 0;
+          opacity: 0.15;
+          background-image: radial-gradient(#fff 1px, transparent 1px);
+          background-size: 12px 12px;
         }
-
-        /* PROFILE CONTENT */
 
         .profile-card-content {
-          padding: 0 42px 38px;
+          padding: 0 45px 38px;
           text-align: center;
+          position: relative;
         }
 
+        /* AVATAR */
+
         .profile-avatar {
-          width: 108px;
-          height: 108px;
+          width: 95px;
+          height: 95px;
           border-radius: 50%;
-          background: linear-gradient(
-            135deg,
-            #7953ed,
-            #a58cf7
-          );
+          background: #1e1b2b;
           color: white;
-          border: 6px solid white;
-          margin: -56px auto 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 34px;
-          font-weight: 750;
-          position: relative;
-          box-shadow: 0 4px 14px rgba(70, 45, 150, 0.16);
+          font-size: 32px;
+          font-weight: 800;
+          display: grid;
+          place-items: center;
+          border: 4px solid #ffffff;
+          margin: -48px auto 14px;
+          box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
         }
 
         .profile-name {
           font-size: 26px;
-          font-weight: 750;
-          color: #191725;
-          margin: 8px 0;
+          font-weight: 800;
+          margin: 0 0 6px;
+          color: #1f1c2b;
         }
 
         .profile-email {

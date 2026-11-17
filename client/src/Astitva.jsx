@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { authAPI, submitTeamApplication } from "./api";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Astitva() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [showApplication, setShowApplication] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -13,6 +16,40 @@ export default function Astitva() {
     reason: "",
   });
 
+  useEffect(() => {
+    let active = true;
+
+    authAPI.getProfile()
+      .then((data) => {
+        if (!active) return;
+        if (!data.student) {
+          setProfileError("Unable to load your profile. Please try again.");
+          return;
+        }
+
+        setFormData((current) => ({
+          ...current,
+          name: data.student.fullName || "",
+          usn: data.student.studentId || "",
+          department: data.student.department || "",
+          year: data.student.year || "",
+        }));
+        setProfileLoaded(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProfileError(
+          error.status === 401
+            ? "Please log in before applying."
+            : "Unable to load your profile. Please try again."
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -20,18 +57,21 @@ export default function Astitva() {
     });
   };
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Astitva Application:", formData);
-    alert("Your application has been submitted successfully!");
-    setShowApplication(false);
-    setFormData({
-      name: "",
-      usn: "",
-      department: "",
-      year: "",
-      reason: "",
-    });
+      if (!profileLoaded) {
+        alert(profileError || "Please wait for your profile to load before applying.");
+        return;
+      }
+
+    try {
+      await submitTeamApplication(formData, "Drama Club", "Astitva");
+      alert("Your application to Astitva has been submitted successfully! You can track its status under 'My Application'.");
+      setShowApplication(false);
+      setFormData((current) => ({ ...current, reason: "" }));
+    } catch (err) {
+      alert(err.message || "Failed to submit application. Please try again.");
+    }
   };
 
   return (
@@ -51,7 +91,7 @@ export default function Astitva() {
           <Link to="/clubs" className="prati-nav-active">
             ♧ &nbsp;Clubs
           </Link>
-          <Link to="/login">▤ &nbsp;My Application</Link>
+          <Link to="/my-applications">▤ &nbsp;My Applications</Link>
           <Link to="/events">▣ &nbsp;Events</Link>
           <Link to="/announcements">⚑ &nbsp;Announcement</Link>
         </nav>
@@ -245,6 +285,7 @@ export default function Astitva() {
                 <input
                   name="name"
                   value={formData.name}
+                  readOnly
                   onChange={handleChange}
                   placeholder="Enter your full name"
                   required
@@ -258,6 +299,7 @@ export default function Astitva() {
                   <input
                     name="usn"
                     value={formData.usn}
+                    readOnly
                     onChange={handleChange}
                     placeholder="Enter your USN"
                     required
@@ -266,38 +308,26 @@ export default function Astitva() {
 
                 <div className="prati-form-group">
                   <label>Department</label>
-                  <select
+                  <input
+                    type="text"
                     name="department"
                     value={formData.department}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">Select department</option>
-                    <option>ISE</option>
-                    <option>CSE</option>
-                    <option>ECE</option>
-                    <option>EEE</option>
-                    <option>ME</option>
-                    <option>CE</option>
-                  </select>
+                  />
                 </div>
 
               </div>
 
               <div className="prati-form-group">
                 <label>Academic Year</label>
-                <select
+                <input
+                  type="text"
                   name="year"
                   value={formData.year}
-                  onChange={handleChange}
+                  readOnly
                   required
-                >
-                  <option value="">Select academic year</option>
-                  <option>1st Year</option>
-                  <option>2nd Year</option>
-                  <option>3rd Year</option>
-                  <option>4th Year</option>
-                </select>
+                />
               </div>
 
               <div className="prati-form-group">
@@ -320,9 +350,11 @@ export default function Astitva() {
                   Cancel
                 </button>
 
+                {!profileLoaded && <p role={profileError ? "alert" : "status"}>{profileError || "Loading your profile..."}</p>}
                 <button
                   type="submit"
                   className="prati-submit-button"
+                  disabled={!profileLoaded}
                 >
                   Submit Application
                 </button>

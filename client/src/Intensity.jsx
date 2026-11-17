@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { authAPI, submitTeamApplication } from "./api";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Intensity() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showModal, setShowModal] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -15,6 +18,40 @@ export default function Intensity() {
     reason: "",
   });
 
+  useEffect(() => {
+    let active = true;
+
+    authAPI.getProfile()
+      .then((data) => {
+        if (!active) return;
+        if (!data.student) {
+          setProfileError("Unable to load your profile. Please try again.");
+          return;
+        }
+
+        setFormData((current) => ({
+          ...current,
+          name: data.student.fullName || "",
+          usn: data.student.studentId || "",
+          department: data.student.department || "",
+          year: data.student.year || "",
+        }));
+        setProfileLoaded(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProfileError(
+          error.status === 401
+            ? "Please log in before applying."
+            : "Unable to load your profile. Please try again."
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -22,22 +59,26 @@ export default function Intensity() {
     });
   };
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
+      if (!profileLoaded) {
+        alert(profileError || "Please wait for your profile to load before applying.");
+        return;
+      }
 
-    console.log("Intensity Application:", formData);
-    alert("Your application has been submitted!");
-
-    setShowModal(false);
-    setFormData({
-      name: "",
-      usn: "",
-      department: "",
-      year: "",
-      danceStyle: "",
-      experience: "",
-      reason: "",
-    });
+    try {
+      await submitTeamApplication(formData, "Dance Club", "Intensity");
+      alert("Your application to Intensity has been submitted successfully! You can track its status under 'My Application'.");
+      setShowModal(false);
+      setFormData((current) => ({
+        ...current,
+        danceStyle: "",
+        experience: "",
+        reason: "",
+      }));
+    } catch (err) {
+      alert(err.message || "Failed to submit application. Please try again.");
+    }
   };
 
   return (
@@ -278,6 +319,7 @@ export default function Intensity() {
                 name="name"
                 placeholder="Enter your name"
                 value={formData.name}
+                readOnly
                 onChange={handleChange}
                 required
               />
@@ -288,6 +330,7 @@ export default function Intensity() {
                 name="usn"
                 placeholder="Enter your USN"
                 value={formData.usn}
+                readOnly
                 onChange={handleChange}
                 required
               />
@@ -295,36 +338,24 @@ export default function Intensity() {
               <div className="intensity-form-row">
                 <div>
                   <label>Department</label>
-                  <select
+                  <input
+                    type="text"
                     name="department"
                     value={formData.department}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">Select</option>
-                    <option value="CSE">CSE</option>
-                    <option value="ISE">ISE</option>
-                    <option value="ECE">ECE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="ME">ME</option>
-                    <option value="CE">CE</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
                   <label>Year</label>
-                  <select
+                  <input
+                    type="text"
                     name="year"
                     value={formData.year}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">Select</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -370,9 +401,11 @@ export default function Intensity() {
                 required
               />
 
+              {!profileLoaded && <p role={profileError ? "alert" : "status"}>{profileError || "Loading your profile..."}</p>}
               <button
                 type="submit"
                 className="intensity-submit-btn"
+                disabled={!profileLoaded}
               >
                 Submit Application →
               </button>

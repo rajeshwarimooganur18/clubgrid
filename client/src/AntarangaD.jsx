@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { authAPI, submitTeamApplication } from "./api";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function AntarangaD() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showModal, setShowModal] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   const initialForm = {
     name: "",
@@ -17,6 +20,40 @@ export default function AntarangaD() {
 
   const [formData, setFormData] = useState(initialForm);
 
+  useEffect(() => {
+    let active = true;
+
+    authAPI.getProfile()
+      .then((data) => {
+        if (!active) return;
+        if (!data.student) {
+          setProfileError("Unable to load your profile. Please try again.");
+          return;
+        }
+
+        setFormData((current) => ({
+          ...current,
+          name: data.student.fullName || "",
+          usn: data.student.studentId || "",
+          department: data.student.department || "",
+          year: data.student.year || "",
+        }));
+        setProfileLoaded(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProfileError(
+          error.status === 401
+            ? "Please log in before applying."
+            : "Unable to load your profile. Please try again."
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -24,12 +61,35 @@ export default function AntarangaD() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Antaranga Application:", formData);
-    alert("Your application has been submitted!");
-    setFormData(initialForm);
-    setShowModal(false);
+    if (!profileLoaded) {
+      alert(profileError || "Please wait for your profile to load before applying.");
+      return;
+    }
+
+    try {
+      const result = await submitTeamApplication(
+        formData,
+        "Dance Club",
+        "AntarangaD",
+        2
+      );
+      if (!result || !result.application || !result.application._id) {
+        throw new Error("The server did not confirm that your application was saved.");
+      }
+
+      alert("Your application has been submitted successfully!");
+      setFormData((current) => ({
+        ...current,
+        danceStyle: "",
+        experience: "",
+        reason: "",
+      }));
+      setShowModal(false);
+    } catch (error) {
+      alert(error.message || "Failed to submit application. Please try again.");
+    }
   };
 
   return (
@@ -296,6 +356,7 @@ export default function AntarangaD() {
                   name="name"
                   placeholder="Enter your name"
                   value={formData.name}
+                  readOnly
                   onChange={handleChange}
                   required
                 />
@@ -308,6 +369,7 @@ export default function AntarangaD() {
                   name="usn"
                   placeholder="Enter your USN"
                   value={formData.usn}
+                  readOnly
                   onChange={handleChange}
                   required
                 />
@@ -316,36 +378,24 @@ export default function AntarangaD() {
               <div className="antaranga-form-row">
                 <div className="antaranga-form-group">
                   <label>Department</label>
-                  <select
+                  <input
+                    type="text"
                     name="department"
                     value={formData.department}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">Select</option>
-                    <option value="CSE">CSE</option>
-                    <option value="ISE">ISE</option>
-                    <option value="ECE">ECE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="ME">ME</option>
-                    <option value="CE">CE</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="antaranga-form-group">
                   <label>Year</label>
-                  <select
+                  <input
+                    type="text"
                     name="year"
                     value={formData.year}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">Select</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                  </select>
+                  />
                 </div>
               </div>
 
@@ -410,9 +460,11 @@ export default function AntarangaD() {
                   Cancel
                 </button>
 
+                {!profileLoaded && <p role={profileError ? "alert" : "status"}>{profileError || "Loading your profile..."}</p>}
                 <button
                   type="submit"
                   className="antaranga-submit-button"
+                  disabled={!profileLoaded}
                 >
                   Submit Application
                 </button>

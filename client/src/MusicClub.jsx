@@ -414,7 +414,7 @@ function MusicClub() {
         <div className="music-nav-links">
           <Link to="/">Home</Link>
           <Link to="/clubs/drama" className="active">Clubs</Link>
-          <Link to="/my-application">My Application</Link>
+          <Link to="/my-applications">My Applications</Link>
           <Link to="/events">Events</Link>
           <Link to="/announcements">Announcement</Link>
         </div>

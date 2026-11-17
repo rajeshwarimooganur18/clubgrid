@@ -1,616 +1,509 @@
-import { useState } from "react";
+﻿import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  adminAPI,
+  applicationsAPI,
+  eventsAPI,
+  announcementsAPI,
+  getCurrentUser,
+  logout
+} from "./api";
+import { AppDetailsModal, AddEventModal, AddAnnouncementModal } from "./AdminModals";
+import "./AdminDashboard.css";
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const currentUser = getCurrentUser();
 
-  const [applications, setApplications] = useState([
-    {
-      id: 1,
-      name: "Ananya Sharma",
-      department: "ISE",
-      year: "3rd Year",
-      club: "Coding Club",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      name: "Rahul Kumar",
-      department: "CSE",
-      year: "2nd Year",
-      club: "Robotics Club",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      name: "Priya Patel",
-      department: "ECE",
-      year: "3rd Year",
-      club: "Photography Club",
-      status: "Accepted",
-    },
-    {
-      id: 4,
-      name: "Arjun Rao",
-      department: "ISE",
-      year: "1st Year",
-      club: "Music Club",
-      status: "Rejected",
-    },
-  ]);
+  const [activeTab, setActiveTab] = useState("applications");
+  const [stats, setStats] = useState({
+    totalApplications: 0, pending: 0, accepted: 0, rejected: 0,
+    totalStudents: 0, totalEvents: 0, totalAnnouncements: 0
+  });
 
-  const updateStatus = (id, newStatus) => {
-    setApplications((currentApplications) =>
-      currentApplications.map((app) =>
-        app.id === id ? { ...app, status: newStatus } : app
-      )
-    );
+  const [applications, setApplications] = useState([]);
+  const [selectedClub, setSelectedClub] = useState("All");
+  const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedAppModal, setSelectedAppModal] = useState(null);
+
+  const [students, setStudents] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [eventForm, setEventForm] = useState({
+    title: "", club: "Drama Club", category: "Technical Workshop",
+    date: "", time: "", venue: "", description: "", status: "Upcoming"
+  });
+
+  const [announcements, setAnnouncements] = useState([]);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: "", category: "General", description: ""
+  });
+
+  const [actionMessage, setActionMessage] = useState("");
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== "admin") {
+      navigate("/login", { replace: true });
+      return;
+    }
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      const [statsData, appsData, studentsData, eventsData, announcementsData] = await Promise.all([
+        adminAPI.getStats().catch(() => ({})),
+        applicationsAPI.getAll({ club: selectedClub, status: selectedStatus }).catch(() => []),
+        adminAPI.getStudents().catch(() => []),
+        eventsAPI.getAll().catch(() => []),
+        announcementsAPI.getAll().catch(() => [])
+      ]);
+
+      setStats(statsData || {});
+      setApplications(appsData || []);
+      setStudents(studentsData || []);
+      setEvents(eventsData || []);
+      setAnnouncements(announcementsData || []);
+    } catch (err) {
+      console.error("Error loading admin dashboard:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser?.role === "admin") {
+      applicationsAPI.getAll({ club: selectedClub, status: selectedStatus })
+        .then((data) => setApplications(data || []))
+        .catch(console.error);
+    }
+  }, [selectedClub, selectedStatus]);
+
+  const updateStatus = async (id, newStatus) => {
+    try {
+      const result = await applicationsAPI.updateStatus(id, newStatus);
+      setApplications((curr) =>
+        curr.map((app) => ((app._id === id || app.id === id) ? { ...app, status: newStatus } : app))
+      );
+      const newStats = await adminAPI.getStats();
+      setStats(newStats);
+      showMessage(result.emailSent === false
+        ? `Status updated to ${newStatus}, but the email notification failed. Check backend logs.`
+        : `Application status updated to ${newStatus}`);
+    } catch (err) {
+      alert(err.message || "Failed to update status");
+    }
+  };
+
+  const showMessage = (msg) => {
+    setActionMessage(msg);
+    setTimeout(() => setActionMessage(""), 3000);
+  };
+
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await eventsAPI.create(eventForm);
+      setEvents([res.event, ...events]);
+      setShowEventModal(false);
+      setEventForm({ title: "", club: "Drama Club", category: "Technical Workshop", date: "", time: "", venue: "", description: "", status: "Upcoming" });
+      showMessage("Event created successfully!");
+    } catch (err) {
+      alert(err.message || "Failed to create event");
+    }
+  };
+
+  const handleDeleteEvent = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+    try {
+      await eventsAPI.delete(id);
+      setEvents(events.filter((e) => (e._id !== id && e.id !== id)));
+      showMessage("Event deleted successfully!");
+    } catch (err) {
+      alert(err.message || "Failed to delete event");
+    }
+  };
+
+  const handleCreateAnnouncement = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await announcementsAPI.create(announcementForm);
+      setAnnouncements([res.announcement, ...announcements]);
+      setShowAnnouncementModal(false);
+      setAnnouncementForm({ title: "", category: "General", description: "" });
+      showMessage("Announcement posted successfully!");
+    } catch (err) {
+      alert(err.message || "Failed to post announcement");
+    }
+  };
+
+  const handleDeleteAnnouncement = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this announcement?")) return;
+    try {
+      await announcementsAPI.delete(id);
+      setAnnouncements(announcements.filter((a) => (a._id !== id && a.id !== id)));
+      showMessage("Announcement deleted successfully!");
+    } catch (err) {
+      alert(err.message || "Failed to delete announcement");
+    }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("clubgridUser");
+    logout();
     navigate("/login", { replace: true });
   };
 
-  const pending = applications.filter(
-    (app) => app.status === "Pending"
-  ).length;
-
-  const accepted = applications.filter(
-    (app) => app.status === "Accepted"
-  ).length;
-
-  const rejected = applications.filter(
-    (app) => app.status === "Rejected"
-  ).length;
-
   return (
     <div className="admin-dashboard">
-
       <header className="admin-header">
-
         <a href="/" className="admin-logo">
           ClubGrid<span>.</span>
         </a>
-
-        <span className="admin-heading-label">
-          ADMIN PANEL
-        </span>
-
-      <button
-  type="button"
-  className="admin-logout"
-  onClick={() => {
-    localStorage.removeItem("clubgridUser");
-    window.location.replace("/login");
-  }}
->
-  <span>↪</span>
-  Logout
-</button>
-
+        <span className="admin-heading-label">ADMIN PANEL</span>
+        <button
+          type="button"
+          onClick={handleLogout}
+          style={{
+            display: "flex", alignItems: "center", gap: "6px", padding: "8px 16px",
+            border: "1px solid #dedede", borderRadius: "8px", background: "#ffffff",
+            fontSize: "13px", fontWeight: "600", color: "#555", cursor: "pointer"
+          }}
+        >
+          <span>↪</span> Logout
+        </button>
       </header>
 
       <main className="admin-main">
-
         <section className="admin-welcome">
           <p className="admin-eyebrow">CLUB MANAGEMENT</p>
           <h1>Admin Dashboard</h1>
-          <p>
-            Review applications and manage student club recruitment.
-          </p>
+          <p>Review applications, manage recruitment, students, events, and announcements.</p>
         </section>
 
-        <section className="admin-stats">
+        {actionMessage && (
+          <div style={{
+            background: "#e8f5e9", color: "#2e7d32", padding: "12px 20px",
+            borderRadius: "8px", marginBottom: "20px", fontWeight: "600", border: "1px solid #c8e6c9"
+          }}>
+            ✅ {actionMessage}
+          </div>
+        )}
 
+        {/* STATS */}
+        <section className="admin-stats">
           <div className="admin-stat-card">
             <span>📋</span>
             <p>Total Applications</p>
-            <h2>{applications.length}</h2>
+            <h2>{stats.totalApplications || applications.length}</h2>
           </div>
-
           <div className="admin-stat-card">
             <span>⏳</span>
             <p>Pending</p>
-            <h2>{pending}</h2>
+            <h2>{stats.pending || applications.filter(a => a.status === 'Pending').length}</h2>
           </div>
-
           <div className="admin-stat-card">
             <span>✅</span>
             <p>Accepted</p>
-            <h2>{accepted}</h2>
+            <h2>{stats.accepted || applications.filter(a => a.status === 'Accepted').length}</h2>
           </div>
-
           <div className="admin-stat-card">
             <span>❌</span>
             <p>Rejected</p>
-            <h2>{rejected}</h2>
+            <h2>{stats.rejected || applications.filter(a => a.status === 'Rejected').length}</h2>
           </div>
-
         </section>
 
-        <section className="admin-applications">
+        {/* TABS */}
+        <div style={{ display: "flex", gap: "10px", borderBottom: "2px solid #eeebf8", marginBottom: "25px", paddingBottom: "10px", flexWrap: "wrap" }}>
+          {[
+            { id: "applications", label: "📋 Applications", count: applications.length },
+            { id: "students", label: "🎓 Registered Students", count: students.length },
+            { id: "events", label: "📅 Events", count: events.length },
+            { id: "announcements", label: "📢 Announcements", count: announcements.length },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{
+                padding: "10px 20px", borderRadius: "8px", border: "none",
+                background: activeTab === tab.id ? "#7953ed" : "#f4f1ff",
+                color: activeTab === tab.id ? "#fff" : "#444", fontWeight: "700",
+                fontSize: "14px", cursor: "pointer", transition: "all 0.2s ease"
+              }}
+            >
+              {tab.label} ({tab.count})
+            </button>
+          ))}
+        </div>
 
-          <div className="admin-section-title">
+        {/* TAB 1: APPLICATIONS */}
+        {activeTab === "applications" && (
+          <section className="admin-applications">
+            <div className="admin-section-title" style={{ flexWrap: "wrap", gap: "15px" }}>
+              <div>
+                <h2>Student Applications</h2>
+                <p>Review each application and update its status.</p>
+              </div>
 
-            <div>
-              <h2>Student Applications</h2>
-              <p>
-                Review each application and update its status.
-              </p>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
+                <div>
+                  <label style={{ fontSize: "12px", color: "#666", marginRight: "6px" }}>Club:</label>
+                  <select value={selectedClub} onChange={(e) => setSelectedClub(e.target.value)} style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #ddd" }}>
+                    <option value="All">All Clubs</option>
+                    <option value="Drama Club">Drama Club</option>
+                    <option value="Dance Club">Dance Club</option>
+                    <option value="Music Club">Music Club</option>
+                    <option value="Coding Club">Coding Club</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: "12px", color: "#666", marginRight: "6px" }}>Status:</label>
+                  <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)} style={{ padding: "8px 12px", borderRadius: "6px", border: "1px solid #ddd" }}>
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Accepted">Accepted</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+                <span className="admin-total">{applications.length} applications</span>
+              </div>
             </div>
 
-            <span className="admin-total">
-              {applications.length} applications
-            </span>
-
-          </div>
-
-          <div className="admin-table-wrapper">
-
-            <table className="admin-table">
-
-              <thead>
-                <tr>
-                  <th>Student</th>
-                  <th>Department</th>
-                  <th>Year</th>
-                  <th>Club</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-
-              <tbody>
-
-                {applications.map((app) => (
-                  <tr key={app.id}>
-
-                    <td className="admin-student-name">
-                      {app.name}
-                    </td>
-
-                    <td>{app.department}</td>
-                    <td>{app.year}</td>
-                    <td>{app.club}</td>
-
-                    <td>
-                      <span
-                        className={`admin-status admin-status-${app.status.toLowerCase()}`}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
-
-                    <td>
-
-                      {app.status === "Pending" ? (
-
-                        <div className="admin-actions">
-
-                          <button
-                            className="admin-accept"
-                            onClick={() =>
-                              updateStatus(app.id, "Accepted")
-                            }
-                          >
-                            Accept
-                          </button>
-
-                          <button
-                            className="admin-reject"
-                            onClick={() =>
-                              updateStatus(app.id, "Rejected")
-                            }
-                          >
-                            Reject
-                          </button>
-
-                        </div>
-
-                      ) : (
-
-                        <button
-                          className="admin-reset"
-                          onClick={() =>
-                            updateStatus(app.id, "Pending")
-                          }
-                        >
-                          Reset
-                        </button>
-
-                      )}
-
-                    </td>
-
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>USN</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>Club & Team</th>
+                    <th>Status</th>
+                    <th>Action</th>
                   </tr>
-                ))}
+                </thead>
+                <tbody>
+                  {applications.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ textAlign: "center", padding: "30px", color: "#888" }}>
+                        No applications found for the selected filter.
+                      </td>
+                    </tr>
+                  ) : (
+                    applications.map((app) => (
+                      <tr key={app._id || app.id}>
+                        <td className="admin-student-name">
+                          <strong>{app.name}</strong>
+                          <div style={{ fontSize: "11px", color: "#888" }}>{app.email}</div>
+                        </td>
+                        <td>{app.usn}</td>
+                        <td>{app.department}</td>
+                        <td>{app.year}</td>
+                        <td>
+                          <strong>{app.teamName}</strong>
+                          <div style={{ fontSize: "12px", color: "#666" }}>{app.clubName}</div>
+                        </td>
+                        <td>
+                          <span className={`admin-status admin-status-${(app.status || 'pending').toLowerCase()}`}>
+                            {app.status}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedAppModal(app)}
+                              style={{
+                                padding: "6px 10px", background: "#f0ebff", color: "#7953ed",
+                                border: "1px solid #d4c7ff", borderRadius: "4px", fontSize: "12px", fontWeight: "600", cursor: "pointer"
+                              }}
+                            >
+                              Details
+                            </button>
+                            {app.status === "Pending" ? (
+                              <div className="admin-actions">
+                                <button className="admin-accept" onClick={() => updateStatus(app._id || app.id, "Accepted")}>Accept</button>
+                                <button className="admin-reject" onClick={() => updateStatus(app._id || app.id, "Rejected")}>Reject</button>
+                              </div>
+                            ) : (
+                              <button className="admin-reset" onClick={() => updateStatus(app._id || app.id, "Pending")}>Reset</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
-              </tbody>
+        {/* TAB 2: STUDENTS */}
+        {activeTab === "students" && (
+          <section className="admin-applications">
+            <div className="admin-section-title">
+              <div>
+                <h2>Registered Students</h2>
+                <p>List of all students registered on ClubGrid.</p>
+              </div>
+              <span className="admin-total">{students.length} students</span>
+            </div>
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>USN</th>
+                    <th>Registered</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.length === 0 ? (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: "center", padding: "30px", color: "#888" }}>No registered students yet.</td>
+                    </tr>
+                  ) : (
+                    students.map((st) => (
+                      <tr key={st._id}>
+                        <td className="admin-student-name">{st.fullName}</td>
+                        <td>{st.email}</td>
+                        <td>{st.department}</td>
+                        <td>{st.year}</td>
+                        <td>{st.studentId || "—"}</td>
+                        <td>{new Date(st.createdAt).toLocaleDateString('en-GB')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
-            </table>
+        {/* TAB 3: EVENTS */}
+        {activeTab === "events" && (
+          <section className="admin-applications">
+            <div className="admin-section-title">
+              <div>
+                <h2>Manage Events</h2>
+                <p>Create and update college club events.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEventModal(true)}
+                style={{ background: "#7953ed", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "8px", fontWeight: "700", cursor: "pointer" }}
+              >
+                + Add Event
+              </button>
+            </div>
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Club</th>
+                    <th>Date & Time</th>
+                    <th>Venue</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {events.length === 0 ? (
+                    <tr><td colSpan="6" style={{ textAlign: "center", padding: "30px", color: "#888" }}>No events found.</td></tr>
+                  ) : (
+                    events.map((ev) => (
+                      <tr key={ev._id || ev.id}>
+                        <td className="admin-student-name">{ev.title}</td>
+                        <td>{ev.club}</td>
+                        <td>{ev.date} • {ev.time}</td>
+                        <td>{ev.venue}</td>
+                        <td><span className="admin-status admin-status-accepted">{ev.status}</span></td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEvent(ev._id || ev.id)}
+                            style={{ background: "#ffebeb", color: "#c62828", border: "1px solid #ffcdd2", padding: "6px 12px", borderRadius: "4px", fontWeight: "600", cursor: "pointer" }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
-          </div>
-
-        </section>
-
-        <p className="admin-note">
-          Demo mode: changes are temporary and will reset when this page reloads.
-        </p>
+        {/* TAB 4: ANNOUNCEMENTS */}
+        {activeTab === "announcements" && (
+          <section className="admin-applications">
+            <div className="admin-section-title">
+              <div>
+                <h2>Manage Announcements</h2>
+                <p>Publish important notices and updates.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAnnouncementModal(true)}
+                style={{ background: "#7953ed", color: "#fff", border: "none", padding: "10px 18px", borderRadius: "8px", fontWeight: "700", cursor: "pointer" }}
+              >
+                + Post Announcement
+              </button>
+            </div>
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {announcements.length === 0 ? (
+                    <tr><td colSpan="5" style={{ textAlign: "center", padding: "30px", color: "#888" }}>No announcements yet.</td></tr>
+                  ) : (
+                    announcements.map((an) => (
+                      <tr key={an._id || an.id}>
+                        <td className="admin-student-name">{an.title}</td>
+                        <td>{an.category}</td>
+                        <td>{an.date}</td>
+                        <td style={{ maxWidth: "300px", whiteSpace: "normal" }}>{an.description}</td>
+                        <td>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteAnnouncement(an._id || an.id)}
+                            style={{ background: "#ffebeb", color: "#c62828", border: "1px solid #ffcdd2", padding: "6px 12px", borderRadius: "4px", fontWeight: "600", cursor: "pointer" }}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
 
       </main>
 
-      <footer className="admin-footer">
+      <AppDetailsModal app={selectedAppModal} onClose={() => setSelectedAppModal(null)} onUpdateStatus={updateStatus} />
+      <AddEventModal isOpen={showEventModal} onClose={() => setShowEventModal(false)} form={eventForm} setForm={setEventForm} onSubmit={handleCreateEvent} />
+      <AddAnnouncementModal isOpen={showAnnouncementModal} onClose={() => setShowAnnouncementModal(false)} form={announcementForm} setForm={setAnnouncementForm} onSubmit={handleCreateAnnouncement} />
+
+      <footer className="admin-footer" style={{ textAlign: "center", padding: "24px", color: "#8c899c", fontSize: "13px", borderTop: "1px solid #eeeeee" }}>
         ClubGrid — Admin Panel
       </footer>
-
-      {/* ALL CSS IS INSIDE THIS FILE */}
-
-      <style>{`
-
-        * {
-          box-sizing: border-box;
-        }
-
-        .admin-dashboard {
-          min-height: 100vh;
-          width: 100%;
-          background: #ffffff;
-          color: #151515;
-          font-family: Arial, Helvetica, sans-serif;
-        }
-
-        /* HEADER */
-
-        .admin-header {
-          width: 100%;
-          min-height: 85px;
-          padding: 0 40px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-bottom: 1px solid #eeeeee;
-          background: #ffffff;
-        }
-
-        .admin-logo {
-          color: #000000;
-          font-size: 30px;
-          font-weight: 750;
-          letter-spacing: -1px;
-          text-decoration: none;
-        }
-
-        .admin-logo span {
-          color: #7953ed;
-        }
-
-        .admin-heading-label {
-          font-size: 13px;
-          font-weight: 700;
-          letter-spacing: 2px;
-          color: #777777;
-        }
-
-        /* LOGOUT BUTTON */
-
-        .admin-logout {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 9px;
-          padding: 11px 20px;
-          border: 1px solid #f2caca;
-          border-radius: 8px;
-          background: #fff1f1;
-          color: #d93636;
-          font-size: 14px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .admin-logout span {
-          font-size: 20px;
-        }
-
-        .admin-logout:hover {
-          background: #d93636;
-          color: #ffffff;
-          border-color: #d93636;
-          transform: translateY(-2px);
-        }
-
-        /* MAIN CONTENT */
-
-        .admin-main {
-          width: 100%;
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 45px 40px;
-        }
-
-        .admin-welcome {
-          margin-bottom: 35px;
-        }
-
-        .admin-eyebrow {
-          margin: 0 0 10px;
-          color: #7953ed;
-          font-size: 12px;
-          font-weight: 700;
-          letter-spacing: 2px;
-        }
-
-        .admin-welcome h1 {
-          margin: 0 0 10px;
-          font-size: 36px;
-          font-weight: 750;
-          letter-spacing: -1px;
-        }
-
-        .admin-welcome > p:last-child {
-          margin: 0;
-          color: #777777;
-          font-size: 16px;
-        }
-
-        /* STATISTICS */
-
-        .admin-stats {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-          margin-bottom: 35px;
-        }
-
-        .admin-stat-card {
-          padding: 22px;
-          min-height: 145px;
-          border: 1px solid #eeeeee;
-          border-radius: 12px;
-          background: #fafafa;
-        }
-
-        .admin-stat-card > span {
-          font-size: 25px;
-        }
-
-        .admin-stat-card p {
-          margin: 13px 0 7px;
-          color: #666666;
-          font-size: 14px;
-        }
-
-        .admin-stat-card h2 {
-          margin: 0;
-          font-size: 30px;
-          font-weight: 750;
-        }
-
-        /* APPLICATION SECTION */
-
-        .admin-applications {
-          padding: 25px;
-          border: 1px solid #e8e8e8;
-          border-radius: 12px;
-          background: #ffffff;
-        }
-
-        .admin-section-title {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 15px;
-          margin-bottom: 25px;
-        }
-
-        .admin-section-title h2 {
-          margin: 0 0 7px;
-          font-size: 23px;
-        }
-
-        .admin-section-title p {
-          margin: 0;
-          color: #777777;
-          font-size: 14px;
-        }
-
-        .admin-total {
-          padding: 9px 14px;
-          border-radius: 20px;
-          background: #f0ebff;
-          color: #7953ed;
-          font-size: 13px;
-          white-space: nowrap;
-        }
-
-        /* TABLE */
-
-        .admin-table-wrapper {
-          width: 100%;
-          overflow-x: auto;
-        }
-
-        .admin-table {
-          width: 100%;
-          min-width: 700px;
-          border-collapse: collapse;
-          text-align: left;
-        }
-
-        .admin-table th {
-          padding: 16px 12px;
-          color: #777777;
-          background: #fafafa;
-          font-size: 13px;
-          font-weight: 600;
-        }
-
-        .admin-table td {
-          padding: 18px 12px;
-          border-bottom: 1px solid #eeeeee;
-          font-size: 14px;
-        }
-
-        .admin-student-name {
-          font-weight: 600;
-        }
-
-        /* STATUS */
-
-        .admin-status {
-          display: inline-block;
-          padding: 7px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 600;
-        }
-
-        .admin-status-pending {
-          background: #fff1c9;
-          color: #8b6500;
-        }
-
-        .admin-status-accepted {
-          background: #d8f8e8;
-          color: #087747;
-        }
-
-        .admin-status-rejected {
-          background: #ffe1e1;
-          color: #c52c2c;
-        }
-
-        /* ACTION BUTTONS */
-
-        .admin-actions {
-          display: flex;
-          gap: 8px;
-        }
-
-        .admin-actions button,
-        .admin-reset {
-          padding: 8px 12px;
-          border: none;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-          transition: 0.2s ease;
-        }
-
-        .admin-accept {
-          background: #d8f8e8;
-          color: #087747;
-        }
-
-        .admin-accept:hover {
-          background: #27c77a;
-          color: #ffffff;
-        }
-
-        .admin-reject {
-          background: #ffe1e1;
-          color: #c52c2c;
-        }
-
-        .admin-reject:hover {
-          background: #dc3636;
-          color: #ffffff;
-        }
-
-        .admin-reset {
-          background: #eeeeee;
-          color: #444444;
-        }
-
-        .admin-reset:hover {
-          background: #7953ed;
-          color: #ffffff;
-        }
-
-        /* FOOTER */
-
-        .admin-note {
-          margin-top: 20px;
-          color: #888888;
-          font-size: 13px;
-          text-align: center;
-        }
-
-        .admin-footer {
-          padding: 22px;
-          border-top: 1px solid #eeeeee;
-          color: #888888;
-          font-size: 13px;
-          text-align: center;
-        }
-
-        /* RESPONSIVE */
-
-        @media (max-width: 900px) {
-          .admin-stats {
-            grid-template-columns: repeat(2, 1fr);
-          }
-
-          .admin-main {
-            padding: 35px 25px;
-          }
-        }
-
-        @media (max-width: 600px) {
-          .admin-header {
-            min-height: 75px;
-            padding: 0 15px;
-          }
-
-          .admin-logo {
-            font-size: 24px;
-          }
-
-          .admin-heading-label {
-            display: none;
-          }
-
-          .admin-logout {
-            padding: 9px 13px;
-          }
-
-          .admin-main {
-            padding: 28px 15px;
-          }
-
-          .admin-welcome h1 {
-            font-size: 28px;
-          }
-
-          .admin-stats {
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-          }
-
-          .admin-stat-card {
-            padding: 15px;
-            min-height: 125px;
-          }
-
-          .admin-stat-card h2 {
-            font-size: 25px;
-          }
-
-          .admin-applications {
-            padding: 15px;
-          }
-
-          .admin-section-title {
-            align-items: flex-start;
-            flex-direction: column;
-          }
-        }
-
-      `}</style>
-
     </div>
   );
 }

@@ -78,7 +78,7 @@ export default function CodingClub() {
           <Link to="/#clubs" className="selected">
             Clubs
           </Link>
-          <Link to="/login">My Application</Link>
+          <Link to="/my-applications">My Applications</Link>
           <Link to="/events">Events</Link>
           <Link to="/announcements">Announcement</Link>
         </nav>

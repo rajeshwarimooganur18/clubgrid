@@ -1,10 +1,13 @@
+import { authAPI, submitTeamApplication } from "./api";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 export default function Tashan() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showModal, setShowModal] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -16,6 +19,40 @@ export default function Tashan() {
     reason: "",
   });
 
+  useEffect(() => {
+    let active = true;
+
+    authAPI.getProfile()
+      .then((data) => {
+        if (!active) return;
+        if (!data.student) {
+          setProfileError("Unable to load your profile. Please try again.");
+          return;
+        }
+
+        setFormData((current) => ({
+          ...current,
+          name: data.student.fullName || "",
+          usn: data.student.studentId || "",
+          department: data.student.department || "",
+          year: data.student.year || "",
+        }));
+        setProfileLoaded(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProfileError(
+          error.status === 401
+            ? "Please log in before applying."
+            : "Unable to load your profile. Please try again."
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,23 +60,31 @@ export default function Tashan() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!profileLoaded) {
+      alert(profileError || "Please wait for your profile to load before applying.");
+      return;
+    }
 
-    console.log("Tashan Application:", formData);
-    alert("Your application has been submitted successfully!");
 
-    setFormData({
-      name: "",
-      usn: "",
-      department: "",
-      year: "",
-      danceStyle: "",
-      experience: "",
-      reason: "",
-    });
+    try {
+      const result = await submitTeamApplication(formData, "Dance Club", "Tashan", 2);
+      if (!result || !result.application || !result.application._id) {
+        throw new Error("The server did not confirm that your application was saved.");
+      }
 
-    setShowModal(false);
+      alert("Your application has been submitted successfully!");
+      setFormData((current) => ({
+        ...current,
+        danceStyle: "",
+        experience: "",
+        reason: "",
+      }));
+      setShowModal(false);
+    } catch (error) {
+      alert(error.message || "Failed to submit application. Please try again.");
+    }
   };
 
   return (
@@ -284,6 +329,7 @@ export default function Tashan() {
                     type="text"
                     name="name"
                     value={formData.name}
+                    readOnly
                     onChange={handleChange}
                     placeholder="Enter your name"
                     required
@@ -296,6 +342,7 @@ export default function Tashan() {
                     type="text"
                     name="usn"
                     value={formData.usn}
+                    readOnly
                     onChange={handleChange}
                     placeholder="Enter your USN"
                     required
@@ -308,6 +355,7 @@ export default function Tashan() {
                     type="text"
                     name="department"
                     value={formData.department}
+                    readOnly
                     onChange={handleChange}
                     placeholder="Enter your department"
                     required
@@ -316,18 +364,13 @@ export default function Tashan() {
 
                 <div className="tashan-form-group">
                   <label>Year of Study</label>
-                  <select
+                  <input
+                    type="text"
                     name="year"
                     value={formData.year}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">Select year</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="tashan-form-group">
@@ -371,7 +414,8 @@ export default function Tashan() {
                 />
               </div>
 
-              <button type="submit" className="tashan-submit">
+              {!profileLoaded && <p role={profileError ? "alert" : "status"}>{profileError || "Loading your profile..."}</p>}
+              <button type="submit" className="tashan-submit" disabled={!profileLoaded}>
                 Submit Application ✨
               </button>
 

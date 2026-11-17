@@ -97,7 +97,7 @@ useEffect(() => {
           <a href="/#clubs" className="selected">
             Clubs
           </a>
-          <a href="/login">My Application</a>
+          <a href="/my-applications">My Applications</a>
           <a href="/events">Events</a>
           <a href="/announcements">Announcement</a>
         </nav>

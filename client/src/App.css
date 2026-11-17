@@ -241,11 +241,35 @@ a {
   line-height: 1;
 }
 
+.cg-clubs-search {
+  display: block;
+  width: min(100%, 420px);
+  height: 42px;
+  margin-bottom: 12px;
+  padding: 0 14px;
+  border: 1px solid #d9d9df;
+  border-radius: 8px;
+  color: #111111;
+  font: inherit;
+}
+
+.cg-clubs-search:focus {
+  border-color: #8a65f4;
+  outline: 2px solid #8a65f433;
+}
+
 .cg-clubs-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px;
-  height: calc(100% - 43px);
+  height: calc(100% - 97px);
+}
+
+.cg-empty-state {
+  grid-column: 1 / -1;
+  align-self: center;
+  color: #565465;
+  text-align: center;
 }
 
 /* CLUB CARD */

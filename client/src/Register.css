@@ -1,9 +1,12 @@
 
 .register-page {
   min-height: 100vh;
+  min-height: 100dvh;
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  align-items: safe center;
   padding: 30px 20px;
   background: linear-gradient(135deg, #e8efff, #f8faff);
   font-family: Arial, sans-serif;
@@ -56,6 +59,20 @@
   border-radius: 7px;
   font-size: 15px;
   background: white;
+  color: #222;
+  color-scheme: light;
+}
+
+.register-card input::placeholder {
+  color: #737373;
+  opacity: 1;
+}
+
+.register-card input:focus-visible,
+.register-card select:focus-visible {
+  border-color: #3155c6;
+  outline: 2px solid #3155c6;
+  outline-offset: 2px;
 }
 
 .register-card button {
@@ -81,11 +98,4 @@
 
 .register-card a {
   color: #3155c6;
-}
-
-.register-home {
-  display: block;
-  text-align: center;
-  margin-top: 16px;
-  font-size: 14px;
 }

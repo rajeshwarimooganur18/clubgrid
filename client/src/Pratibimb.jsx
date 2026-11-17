@@ -1,5 +1,6 @@
+import { authAPI, submitTeamApplication } from "./api";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Pratibimb.css";
 
 const achievements = [
@@ -27,6 +28,8 @@ export default function Pratibimb() {
   const [activeTab, setActiveTab] = useState("Overview");
   const [showApplication, setShowApplication] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [profileError, setProfileError] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -36,6 +39,40 @@ export default function Pratibimb() {
     reason: "",
   });
 
+  useEffect(() => {
+    let active = true;
+
+    authAPI.getProfile()
+      .then((data) => {
+        if (!active) return;
+        if (!data.student) {
+          setProfileError("Unable to load your profile. Please try again.");
+          return;
+        }
+
+        setFormData((current) => ({
+          ...current,
+          name: data.student.fullName || "",
+          usn: data.student.studentId || "",
+          department: data.student.department || "",
+          year: data.student.year || "",
+        }));
+        setProfileLoaded(true);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setProfileError(
+          error.status === 401
+            ? "Please log in before applying."
+            : "Unable to load your profile. Please try again."
+        );
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -44,60 +81,20 @@ export default function Pratibimb() {
   };
 
   // Submit application to backend
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (submitting) return;
-
-    setSubmitting(true);
+    if (!profileLoaded) {
+      alert(profileError || "Please wait for your profile to load before applying.");
+      return;
+    }
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/applications",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            usn: formData.usn,
-            department: formData.department,
-            year: formData.year,
-            reason: formData.reason,
-            clubName: "Drama Club",
-            teamName: "Pratibimb",
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Submission failed.");
-      }
-
-      alert("Your application has been submitted successfully!");
-
+      await submitTeamApplication(formData, "Drama Club", "Pratibimb");
+      alert("Your application to Pratibimb has been submitted successfully! You can track its status under 'My Application'.");
       setShowApplication(false);
-
-      setFormData({
-        name: "",
-        usn: "",
-        department: "",
-        year: "",
-        reason: "",
-      });
-
-    } catch (error) {
-      console.error("Application submission error:", error);
-
-      alert(
-        error.message || "Something went wrong. Please try again."
-      );
-
-    } finally {
-      setSubmitting(false);
+      setFormData((current) => ({ ...current, reason: "" }));
+    } catch (err) {
+      alert(err.message || "Failed to submit application. Please try again.");
     }
   };
 
@@ -121,7 +118,7 @@ export default function Pratibimb() {
           <a href="/#clubs" className="prati-nav-active">
             Clubs
           </a>
-          <a href="/login">My Application</a>
+          <a href="/my-applications">My Applications</a>
           <a href="/events">Events</a>
           <a href="/announcements">Announcement</a>
         </nav>
@@ -345,7 +342,7 @@ export default function Pratibimb() {
                   name="name"
                   placeholder="Enter your full name"
                   value={formData.name}
-                  onChange={handleChange}
+                  readOnly
                   required
                 />
               </div>
@@ -361,7 +358,7 @@ export default function Pratibimb() {
                   name="usn"
                   placeholder="Enter your USN"
                   value={formData.usn}
-                  onChange={handleChange}
+                  readOnly
                   required
                 />
               </div>
@@ -373,24 +370,13 @@ export default function Pratibimb() {
                     Department
                   </label>
 
-                  <select
+                  <input
                     id="prati-department"
-                    name="department"
+                    type="text"
                     value={formData.department}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">
-                      Select department
-                    </option>
-
-                    <option value="ISE">ISE</option>
-                    <option value="CSE">CSE</option>
-                    <option value="ECE">ECE</option>
-                    <option value="EEE">EEE</option>
-                    <option value="ME">Mechanical</option>
-                    <option value="CE">Civil</option>
-                  </select>
+                  />
                 </div>
 
                 <div className="prati-form-group">
@@ -398,22 +384,13 @@ export default function Pratibimb() {
                     Academic Year
                   </label>
 
-                  <select
+                  <input
                     id="prati-year"
-                    name="year"
+                    type="text"
                     value={formData.year}
-                    onChange={handleChange}
+                    readOnly
                     required
-                  >
-                    <option value="">
-                      Select year
-                    </option>
-
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                  </select>
+                  />
                 </div>
 
               </div>
@@ -448,7 +425,7 @@ export default function Pratibimb() {
                 <button
                   type="submit"
                   className="prati-submit-button"
-                  disabled={submitting}
+                  disabled={submitting || !profileLoaded}
                 >
                   {submitting
                     ? "Submitting..."
@@ -459,6 +436,8 @@ export default function Pratibimb() {
               <p className="prati-modal-note">
                 🎭 Your journey with PratiBimb starts here.
               </p>
+
+              {profileError && <p role="alert">{profileError}</p>}
 
             </form>
           </div>
