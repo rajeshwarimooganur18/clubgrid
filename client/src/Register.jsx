@@ -9,26 +9,76 @@ function Register() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [studentId, setStudentId] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [idCardFile, setIdCardFile] = useState(null);
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [fileError, setFileError] = useState('');
+
+  const handleIdCardChange = (e) => {
+    const file = e.target.files[0];
+    setFileError('');
+    
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        setFileError('Only JPG, JPEG, PNG, and PDF files are allowed.');
+        e.target.value = '';
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setFileError('File size must be less than 5MB.');
+        e.target.value = '';
+        return;
+      }
+      setIdCardFile(file);
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    // Only allow digits
+    const value = e.target.value.replace(/\D/g, '');
+    setPhoneNumber(value.slice(0, 10));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setMessage('');
+    setFileError('');
     setLoading(true);
 
     const form = e.target;
 
-    const studentData = {
-      fullName: form.fullName.value,
-      email: form.email.value,
-      password: form.password.value,
-      department: form.department.value,
-      year: form.year.value,
-      studentId: studentId.trim().toUpperCase()
-    };
+    // Validate phone number
+    if (!phoneNumber || phoneNumber.length !== 10) {
+      setMessage('Please enter a valid 10-digit phone number.');
+      setLoading(false);
+      return;
+    }
+
+    // Validate ID card file
+    if (!idCardFile) {
+      setMessage('Please upload your college ID card.');
+      setLoading(false);
+      return;
+    }
+
+    // Create FormData for multipart/form-data
+    const formData = new FormData();
+    formData.append('fullName', form.fullName.value);
+    formData.append('email', form.email.value);
+    formData.append('password', form.password.value);
+    formData.append('department', form.department.value);
+    formData.append('year', form.year.value);
+    formData.append('studentId', studentId.trim().toUpperCase());
+    formData.append('phoneNumber', phoneNumber);
+    formData.append('smsConsent', smsConsent ? 'true' : 'false');
+    formData.append('idCard', idCardFile);
 
     try {
-      const data = await authAPI.register(studentData);
+      const data = await authAPI.register(formData);
 
       alert(data.message);
       navigate('/login', { replace: true });
@@ -79,6 +129,35 @@ function Register() {
             required
           />
 
+          <label>Phone Number (+91)</label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input
+              type="text"
+              value="+91"
+              readOnly
+              style={{
+                width: '70px',
+                background: '#f5f5f5',
+                color: '#666',
+                border: '1px solid #ccc',
+                borderRadius: '7px',
+                padding: '12px',
+                fontSize: '15px',
+                boxSizing: 'border-box'
+              }}
+            />
+            <input
+              type="tel"
+              name="phoneNumber"
+              placeholder="10-digit mobile number"
+              value={phoneNumber}
+              onChange={handlePhoneChange}
+              maxLength={10}
+              required
+              style={{ flex: 1 }}
+            />
+          </div>
+
           <label>Password</label>
           <input
             type="password"
@@ -113,6 +192,34 @@ function Register() {
           <select value="Student" disabled>
             <option value="Student">Student</option>
           </select>
+
+          <label>Upload College ID Card</label>
+          <input
+            type="file"
+            name="idCard"
+            accept=".jpg,.jpeg,.png,.pdf"
+            onChange={handleIdCardChange}
+            required
+          />
+          {idCardFile && (
+            <p style={{ fontSize: '13px', color: '#666', marginTop: '-8px', marginBottom: '4px' }}>
+              Selected: {idCardFile.name} ({(idCardFile.size / 1024).toFixed(1)} KB)
+            </p>
+          )}
+          {fileError && (
+            <p style={{ color: 'red', fontSize: '13px', marginTop: '-8px', marginBottom: '4px' }}>{fileError}</p>
+          )}
+
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'normal' }}>
+            <input
+              type="checkbox"
+              name="smsConsent"
+              checked={smsConsent}
+              onChange={(e) => setSmsConsent(e.target.checked)}
+              style={{ width: '18px', height: '18px', accentColor: '#3155c6' }}
+            />
+            <span style={{ fontSize: '14px' }}>I agree to receive SMS notifications about college events and announcements.</span>
+          </label>
 
           {message && (
             <p style={{ color: 'red' }}>{message}</p>
