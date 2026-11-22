@@ -1,24 +1,24 @@
 
 import { useEffect, useState } from 'react';
 import './Application.css';
-import { applicationsAPI, authAPI, clubsAPI, getToken } from './api';
+import { applicationsAPI, authAPI, teamsAPI, getToken } from './api';
 
 function Application() {
   const [student, setStudent] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
-  const [clubs, setClubs] = useState([]);
+
   const [teams, setTeams] = useState([]);
-  const [clubId, setClubId] = useState('');
-  const [teamName, setTeamName] = useState('');
+  const [teamId, setTeamId] = useState('');
+
   const [skills, setSkills] = useState('');
   const [reason, setReason] = useState('');
   const [message, setMessage] = useState('');
+
   const [loading, setLoading] = useState(false);
+  const [teamsLoading, setTeamsLoading] = useState(true);
 
-  const selectedClub =
-    new URLSearchParams(window.location.search).get('club') || '';
-
+  // Load the logged-in student's profile
   useEffect(() => {
     let active = true;
 
@@ -30,6 +30,7 @@ function Application() {
       })
       .catch(error => {
         if (!active) return;
+
         setStudent(null);
         setProfileError(
           error.status === 401
@@ -46,40 +47,28 @@ function Application() {
     };
   }, []);
 
-  // Load clubs from backend
+  // Load active standalone Teams
   useEffect(() => {
-    clubsAPI.getAll()
+    let active = true;
+
+    teamsAPI.getActive()
       .then(data => {
-        setClubs(data);
+        if (!active) return;
 
-        if (selectedClub) {
-          const matchedClub = data.find(
-            club => club.name.toLowerCase() === selectedClub.toLowerCase()
-          );
-
-          if (matchedClub) {
-            setClubId(String(matchedClub.clubId));
-          }
-        }
+        setTeams(Array.isArray(data) ? data : []);
       })
-      .catch(error => setMessage(error.message));
+      .catch(error => {
+        if (!active) return;
+        setMessage(error.message);
+      })
+      .finally(() => {
+        if (active) setTeamsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
-
-  // Load teams whenever the selected club changes
-  useEffect(() => {
-    if (!clubId) {
-      setTeams([]);
-      setTeamName('');
-      return;
-    }
-
-    clubsAPI.getTeams(clubId)
-      .then(data => {
-        setTeams(data);
-        setTeamName('');
-      })
-      .catch(error => setMessage(error.message));
-  }, [clubId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -92,17 +81,17 @@ function Application() {
       return;
     }
 
-    if (!clubId || !teamName) {
-      setMessage('Please select a club and team.');
+    if (!teamId) {
+      setMessage('Please select a Team.');
       return;
     }
 
-    const selectedClubData = clubs.find(
-      club => String(club.clubId) === clubId
+    const selectedTeam = teams.find(
+      team => String(team._id) === String(teamId)
     );
 
-    if (!selectedClubData) {
-      setMessage('Please select a valid club.');
+    if (!selectedTeam) {
+      setMessage('Please select a valid Team.');
       return;
     }
 
@@ -110,14 +99,13 @@ function Application() {
 
     try {
       const data = await applicationsAPI.submit({
-        clubId: Number(clubId),
+        teamId: selectedTeam._id,
         name: student.fullName || student.name || '',
         email: student.email || '',
         usn: student.studentId || student.usn || '',
         department: student.department || '',
         year: student.year || '',
-        clubName: selectedClubData.name,
-        teamName,
+        teamName: selectedTeam.name,
         skills,
         reason
       });
@@ -125,7 +113,7 @@ function Application() {
       setMessage(data.message || 'Application submitted successfully!');
       setSkills('');
       setReason('');
-      setTeamName('');
+      setTeamId('');
 
     } catch (error) {
       setMessage(error.message);
@@ -140,6 +128,7 @@ function Application() {
         <a href="/" className="application-logo">
           ClubGrid<span>.</span>
         </a>
+
         <a href="/clubs" className="application-back">
           ← Explore Clubs
         </a>
@@ -147,9 +136,15 @@ function Application() {
 
       <main className="application-container">
         <div className="application-heading">
-          <p className="application-label">YOUR JOURNEY STARTS HERE</p>
+          <p className="application-label">
+            YOUR JOURNEY STARTS HERE
+          </p>
+
           <h1>Join a Club</h1>
-          <p>Tell us about yourself and apply to your favourite club.</p>
+
+          <p>
+            Tell us about yourself and apply to your favourite team.
+          </p>
         </div>
 
         <form className="application-form" onSubmit={handleSubmit}>
@@ -185,38 +180,34 @@ function Application() {
             required
           />
 
-          <label htmlFor="club">Choose a Club *</label>
-          <select
-            id="club"
-            value={clubId}
-            onChange={event => setClubId(event.target.value)}
-            required
-          >
-            <option value="">Select a club</option>
-            {clubs.map(club => (
-              <option key={club.clubId} value={club.clubId}>
-                {club.name}
-              </option>
-            ))}
-          </select>
-
           <label htmlFor="team">Choose a Team *</label>
+
           <select
             id="team"
-            value={teamName}
-            onChange={event => setTeamName(event.target.value)}
+            value={teamId}
+            onChange={event => setTeamId(event.target.value)}
             required
-            disabled={!clubId || teams.length === 0}
+            disabled={teamsLoading || teams.length === 0}
           >
-            <option value="">Select a team</option>
+            <option value="">
+              {teamsLoading
+                ? 'Loading Teams...'
+                : teams.length === 0
+                  ? 'No active Teams available'
+                  : 'Select a Team'}
+            </option>
+
             {teams.map(team => (
-              <option key={team.id} value={team.name}>
+              <option key={team._id} value={team._id}>
                 {team.name}
               </option>
             ))}
           </select>
 
-          <label htmlFor="skills">Your Skills and Interests *</label>
+          <label htmlFor="skills">
+            Your Skills and Interests *
+          </label>
+
           <textarea
             id="skills"
             value={skills}
@@ -229,6 +220,7 @@ function Application() {
           <label htmlFor="reason">
             Why do you want to join this team? *
           </label>
+
           <textarea
             id="reason"
             value={reason}
@@ -241,13 +233,24 @@ function Application() {
           <button
             type="submit"
             className="application-submit"
-            disabled={loading || profileLoading || !student}
+            disabled={
+              loading ||
+              profileLoading ||
+              !student ||
+              teamsLoading ||
+              teams.length === 0
+            }
           >
             {loading ? 'Submitting...' : 'Submit Application →'}
           </button>
 
-          {message && <p role="status">{message}</p>}
-          {profileError && <p role="alert">{profileError}</p>}
+          {message && (
+            <p role="status">{message}</p>
+          )}
+
+          {profileError && (
+            <p role="alert">{profileError}</p>
+          )}
 
           <p className="application-note">
             * Please fill in all required fields.

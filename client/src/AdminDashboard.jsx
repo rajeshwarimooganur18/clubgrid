@@ -22,11 +22,14 @@ function AdminDashboard() {
   });
 
   const [applications, setApplications] = useState([]);
+  const [promotingStudentId, setPromotingStudentId] = useState(null);
   const [selectedClub, setSelectedClub] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedAppModal, setSelectedAppModal] = useState(null);
 
   const [students, setStudents] = useState([]);
+  const [studentMasterFile, setStudentMasterFile] = useState(null);
+const [uploadingStudentMaster, setUploadingStudentMaster] = useState(false);
   const [events, setEvents] = useState([]);
   const [showEventModal, setShowEventModal] = useState(false);
   const [eventForm, setEventForm] = useState({
@@ -43,7 +46,7 @@ function AdminDashboard() {
   const [actionMessage, setActionMessage] = useState("");
 
   useEffect(() => {
-    if (!currentUser || currentUser.role !== "admin") {
+    if (!currentUser || currentUser.role !== "super_admin") {
       navigate("/login", { replace: true });
       return;
     }
@@ -71,7 +74,7 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (currentUser?.role === "admin") {
+    if (currentUser?.role === "super_admin") {
       applicationsAPI.getAll({ club: selectedClub, status: selectedStatus })
         .then((data) => setApplications(data || []))
         .catch(console.error);
@@ -123,6 +126,33 @@ function AdminDashboard() {
     }
   };
 
+const handleStudentMasterUpload = async () => {
+  if (!studentMasterFile) {
+    showMessage("Please select an Excel file first.");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", studentMasterFile);
+
+  try {
+    setUploadingStudentMaster(true);
+
+    const result = await adminAPI.uploadStudentMaster(formData);
+
+    showMessage(
+      `Upload successful! ${result.inserted} inserted, ${result.updated} updated.`
+    );
+
+    setStudentMasterFile(null);
+  } catch (error) {
+    showMessage(error.message || "Student Master upload failed.");
+  } finally {
+    setUploadingStudentMaster(false);
+  }
+};
+
+
   const handleCreateAnnouncement = async (e) => {
     e.preventDefault();
     try {
@@ -146,6 +176,23 @@ function AdminDashboard() {
       alert(err.message || "Failed to delete announcement");
     }
   };
+  const handlePromoteToTeamAdmin = async (student) => {
+  setPromotingStudentId(student._id);
+  setActionMessage("");
+
+  try {
+    await adminAPI.promoteStudentToTeamAdmin(student._id, {
+      studentId: student.studentId
+    });
+
+    setActionMessage(`${student.fullName} promoted to Team Admin successfully!`);
+    loadDashboardData();
+  } catch (err) {
+    setActionMessage(err.message || "Promotion failed");
+  } finally {
+    setPromotingStudentId(null);
+  }
+};
 
   const handleLogout = () => {
     logout();
@@ -338,50 +385,157 @@ function AdminDashboard() {
           </section>
         )}
 
-        {/* TAB 2: STUDENTS */}
-        {activeTab === "students" && (
-          <section className="admin-applications">
-            <div className="admin-section-title">
-              <div>
-                <h2>Registered Students</h2>
-                <p>List of all students registered on ClubGrid.</p>
-              </div>
-              <span className="admin-total">{students.length} students</span>
-            </div>
-            <div className="admin-table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Full Name</th>
-                    <th>Email</th>
-                    <th>Department</th>
-                    <th>Year</th>
-                    <th>USN</th>
-                    <th>Registered</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {students.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" style={{ textAlign: "center", padding: "30px", color: "#888" }}>No registered students yet.</td>
-                    </tr>
-                  ) : (
-                    students.map((st) => (
-                      <tr key={st._id}>
-                        <td className="admin-student-name">{st.fullName}</td>
-                        <td>{st.email}</td>
-                        <td>{st.department}</td>
-                        <td>{st.year}</td>
-                        <td>{st.studentId || "—"}</td>
-                        <td>{new Date(st.createdAt).toLocaleDateString('en-GB')}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
+        
+{/* TAB 2: STUDENTS */}
+{activeTab === "students" && (
+  <section className="admin-applications">
+
+    {/* STUDENT MASTER EXCEL UPLOAD */}
+    <div
+      style={{
+        background: "#fff",
+        padding: "20px",
+        borderRadius: "12px",
+        border: "1px solid #eee",
+        marginBottom: "24px"
+      }}
+    >
+      <h2>Student Master Upload</h2>
+      <p>
+        Upload the authorized student roster in Excel (.xlsx) format.
+      </p>
+
+      <input
+        type="file"
+        accept=".xlsx"
+        onChange={(e) =>
+          setStudentMasterFile(
+            e.target.files && e.target.files.length > 0
+              ? e.target.files[0]
+              : null
+          )
+        }
+      />
+
+      {studentMasterFile && (
+        <p>Selected file: {studentMasterFile.name}</p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleStudentMasterUpload}
+        disabled={!studentMasterFile || uploadingStudentMaster}
+        style={{
+          background: "#7953ed",
+          color: "#fff",
+          border: "none",
+          padding: "10px 18px",
+          borderRadius: "8px",
+          marginTop: "12px",
+          cursor: "pointer",
+          opacity: uploadingStudentMaster ? 0.6 : 1
+        }}
+      >
+        {uploadingStudentMaster ? "Uploading..." : "Upload Excel"}
+      </button>
+    </div>
+
+    {/* REGISTERED STUDENTS TABLE */}
+    <div className="admin-section-title">
+      <div>
+        <h2>Registered Students</h2>
+        <p>List of all students registered on ClubGrid.</p>
+      </div>
+      <span className="admin-total">
+        {students.length} students
+      </span>
+    </div>
+
+    <div className="admin-table-wrapper">
+      <table className="admin-table">
+        <thead>
+  <tr>
+    <th>Full Name</th>
+    <th>Email</th>
+    <th>Department</th>
+    <th>Year</th>
+    <th>USN</th>
+    <th>Role</th>
+    <th>Action</th>
+    <th>Registered</th>
+  </tr>
+</thead>
+
+        <tbody>
+          {students.length === 0 ? (
+            <tr>
+              <td
+                colSpan="8"
+                style={{
+                  textAlign: "center",
+                  padding: "30px",
+                  color: "#888"
+                }}
+              >
+                No registered students yet.
+              </td>
+            </tr>
+          ) : (
+            students.map((st) => (
+              <tr key={st._id}>
+                <td className="admin-student-name">{st.fullName}</td>
+<td>{st.email}</td>
+<td>{st.department}</td>
+<td>{st.year}</td>
+<td>{st.studentId || "—"}</td>
+<td>
+  <span>
+    {st.role === "team_admin" ? "Team Admin" : "Student"}
+  </span>
+</td>
+<td>
+  {st.role === "student" && st.studentId && (
+    <button
+      type="button"
+      onClick={() => handlePromoteToTeamAdmin(st)}
+      disabled={promotingStudentId === st._id}
+      style={{
+        background: "#e8f5e9",
+        color: "#2e7d32",
+        border: "1px solid #c8e6c9",
+        padding: "6px 12px",
+        borderRadius: "4px",
+        fontWeight: "600",
+        fontSize: "12px",
+        cursor: "pointer",
+        opacity: promotingStudentId === st._id ? 0.6 : 1
+      }}
+    >
+      {promotingStudentId === st._id ? "Promoting..." : "Promote to Team Admin"}
+    </button>
+  )}
+  {st.role === "team_admin" && (
+    <span style={{ color: "#2e7d32", fontWeight: "600", fontSize: "12px" }}>
+      Team Admin
+    </span>
+  )}
+  {!st.studentId && st.role === "student" && (
+    <span style={{ color: "#888", fontSize: "12px" }}>
+      No Student ID
+    </span>
+  )}
+</td>
+<td>{new Date(st.createdAt).toLocaleDateString("en-GB")}</td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+)}
+
 
         {/* TAB 3: EVENTS */}
         {activeTab === "events" && (

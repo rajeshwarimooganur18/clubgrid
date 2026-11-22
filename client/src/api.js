@@ -1,4 +1,5 @@
-﻿const API_BASE_URL = "http://localhost:5000/api";
+﻿const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export const getToken = () =>
   localStorage.getItem("clubgridToken") || localStorage.getItem("token");
@@ -42,8 +43,9 @@ export const logout = () => {
 
 export const apiFetch = async (endpoint, options = {}) => {
   const token = getToken();
+  const isFormData = options.body instanceof FormData;
   const headers = {
-    "Content-Type": "application/json",
+    ...(!isFormData ? { "Content-Type": "application/json" } : {}),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(options.headers || {}),
   };
@@ -74,10 +76,11 @@ export const authAPI = {
       body: JSON.stringify({ email, password, role }),
     }),
 
-  register: (userData) =>
+register: (formData) =>
     apiFetch("/auth/register", {
       method: "POST",
-      body: JSON.stringify(userData),
+      body: formData,
+      headers: {}, // Let browser set Content-Type for FormData (including boundary)
     }),
 
   forgotPassword: (email) =>
@@ -100,6 +103,10 @@ export const clubsAPI = {
   getAll: () => apiFetch("/clubs"),
   getById: (id) => apiFetch(`/clubs/${id}`),
   getTeams: (clubId) => apiFetch(`/clubs/${clubId}/teams`),
+};
+// TEAMS API
+export const teamsAPI = {
+  getActive: () => apiFetch("/teams/active"),
 };
 
 // APPLICATIONS API
@@ -163,10 +170,24 @@ export const announcementsAPI = {
 };
 
 // ADMIN API
+
 export const adminAPI = {
   getStats: () => apiFetch("/admin/stats"),
   getStudents: () => apiFetch("/admin/students"),
+
+  uploadStudentMaster: (formData) =>
+    apiFetch("/admin/student-master/upload", {
+      method: "POST",
+      body: formData,
+    }),
+
+promoteStudentToTeamAdmin: (studentId, data = {}) =>
+    apiFetch(`/teams/promote-student/${studentId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
 };
+
 
 export const submitTeamApplication = async (formData, clubName, teamName, clubId) => {
   const user = getCurrentUser();

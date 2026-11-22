@@ -1,0 +1,326 @@
+.team-admin-page {
+  min-height: 100vh;
+  padding: 40px clamp(18px, 5vw, 70px);
+  background: #f5f6fc;
+  color: #20233a;
+  font-family: inherit;
+}
+
+.team-admin-header {
+  padding: 38px;
+  border-radius: 22px;
+  color: white;
+  background: linear-gradient(120deg, #25265e, #5146a5 65%, #7764c9);
+  box-shadow: 0 12px 30px rgba(45, 39, 110, 0.16);
+}
+
+.team-admin-eyebrow {
+  margin: 0 0 12px;
+  color: #d6d0ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.team-admin-header h1 {
+  margin: 0;
+  font-size: clamp(27px, 4vw, 38px);
+  font-weight: 750;
+}
+
+.team-admin-header > div > p:last-child {
+  margin: 12px 0 0;
+  color: #e4e1ff;
+  font-size: 15px;
+}
+
+.team-admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 28px 0;
+}
+
+.team-stat-card {
+  padding: 23px;
+  border: 1px solid #e9e8f2;
+  border-radius: 17px;
+  background: white;
+  box-shadow: 0 5px 18px rgba(35, 35, 75, 0.04);
+}
+
+.team-stat-card span {
+  display: block;
+  color: #77798e;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.team-stat-card strong {
+  display: block;
+  margin-top: 10px;
+  color: #292653;
+  font-size: 32px;
+}
+
+.team-stat-card.pending {
+  border-left: 4px solid #e9a23b;
+}
+
+.team-stat-card.accepted {
+  border-left: 4px solid #26a779;
+}
+
+.team-stat-card.rejected {
+  border-left: 4px solid #df626d;
+}
+
+.team-applications-section {
+  padding: 28px;
+  border: 1px solid #e9e8f2;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 5px 22px rgba(35, 35, 75, 0.04);
+}
+
+.team-applications-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.team-applications-heading h2 {
+  margin: 0;
+  color: #292653;
+  font-size: 23px;
+}
+
+.team-applications-heading p {
+  margin: 7px 0 0;
+  color: #85869a;
+  font-size: 14px;
+}
+
+.team-refresh-button {
+  padding: 11px 19px;
+  border: 1px solid #dcd9f3;
+  border-radius: 10px;
+  background: #f5f3ff;
+  color: #5146a5;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.team-refresh-button:hover {
+  background: #eae6ff;
+}
+
+.team-refresh-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.team-admin-error,
+.team-admin-notice {
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.team-admin-error {
+  background: #fff0f0;
+  color: #b83242;
+}
+
+.team-admin-notice {
+  background: #eaf8f1;
+  color: #18764e;
+}
+
+.team-admin-empty {
+  padding: 35px 15px;
+  border: 1px dashed #d9d7e8;
+  border-radius: 13px;
+  color: #85869a;
+  text-align: center;
+}
+
+.team-application-list {
+  display: grid;
+  gap: 18px;
+}
+
+.team-application-card {
+  padding: 23px;
+  border: 1px solid #ecebf4;
+  border-radius: 16px;
+  background: #fdfdff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.team-application-card:hover {
+  border-color: #c9c2f1;
+  box-shadow: 0 7px 20px rgba(55, 47, 120, 0.07);
+}
+
+.team-application-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.team-application-top h3 {
+  margin: 0;
+  color: #292653;
+  font-size: 19px;
+}
+
+.team-application-top p {
+  margin: 6px 0 0;
+  color: #88899c;
+  font-size: 13px;
+}
+
+.team-status-badge {
+  padding: 7px 13px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.team-status-badge.pending {
+  background: #fff4df;
+  color: #a56a0b;
+}
+
+.team-status-badge.accepted {
+  background: #e4f7ee;
+  color: #19845b;
+}
+
+.team-status-badge.rejected {
+  background: #ffeaec;
+  color: #bd3f4b;
+}
+
+.team-application-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 22px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f5f4fb;
+}
+
+.team-application-details p {
+  margin: 0;
+  color: #65667b;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.team-application-details strong {
+  color: #353451;
+}
+
+.team-application-reason {
+  margin-top: 18px;
+}
+
+.team-application-reason strong {
+  color: #353451;
+  font-size: 14px;
+}
+
+.team-application-reason p {
+  margin: 8px 0 0;
+  color: #737489;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.team-application-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.team-accept-button,
+.team-reject-button {
+  padding: 10px 22px;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.team-accept-button {
+  background: #218b65;
+  color: white;
+}
+
+.team-reject-button {
+  background: #fff0f0;
+  color: #bd3f4b;
+}
+
+.team-accept-button:hover,
+.team-reject-button:hover {
+  transform: translateY(-2px);
+}
+
+.team-accept-button:disabled,
+.team-reject-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}
+
+@media (max-width: 850px) {
+  .team-admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 550px) {
+  .team-admin-page {
+    padding: 22px 14px;
+  }
+
+  .team-admin-header {
+    padding: 26px 21px;
+  }
+
+  .team-admin-stats {
+    gap: 11px;
+  }
+
+  .team-stat-card {
+    padding: 17px;
+  }
+
+  .team-applications-section {
+    padding: 18px;
+  }
+
+  .team-applications-heading {
+    align-items: flex-start;
+  }
+
+  .team-application-details {
+    grid-template-columns: 1fr;
+  }
+
+  .team-application-card {
+    padding: 17px;
+  }
+}

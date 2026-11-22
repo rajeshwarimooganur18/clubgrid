@@ -19,7 +19,7 @@ function SessionGate({ children, unauthenticated, redirectAuthenticated = false 
     return unauthenticated;
   }
   if (redirectAuthenticated) {
-    return <Navigate to={user.role === 'admin' ? '/admin' : '/'} replace />;
+    return <Navigate to={user.role === 'super_admin' ? '/admin' : '/'} replace />;
   }
 
   return children;

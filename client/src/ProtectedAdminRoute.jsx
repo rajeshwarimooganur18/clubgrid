@@ -10,7 +10,7 @@ function ProtectedAdminRoute({ children }) {
   if (status === 'unauthenticated') {
     return <Navigate to="/login" replace />;
   }
-  if (status === 'authenticated' && user.role !== 'admin') {
+  if (status === 'authenticated' && user.role !== 'super_admin') {
     return <Navigate to="/" replace />;
   }
   if (status === 'error') {
@@ -22,7 +22,7 @@ function ProtectedAdminRoute({ children }) {
     );
   }
 
-  return status === 'authenticated' && user.role === 'admin' ? children : null;
+  return status === 'authenticated' && user.role === 'super_admin' ? children : null;
 }
 
 export default ProtectedAdminRoute;

@@ -234,7 +234,7 @@ function Profile() {
 
             <div className="profile-status">
               <span className="profile-status-dot"></span>
-              Active {student?.role === 'admin' ? 'Administrator' : 'Student'}
+              Active {student?.role === 'super_admin' ? 'Super Admin' : 'Student'}
             </div>
 
             <div className="profile-divider"></div>

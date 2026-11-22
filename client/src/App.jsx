@@ -44,6 +44,8 @@ import Anonymous from "./Anonymous";
 import QwertyIO from "./QwertyIO";
 import GDG from "./GDG";
 import Aerospace from "./Aerospace";
+import TeamAdminDashboard from "./TeamAdminDashboard";
+import ProtectedTeamAdminRoute from "./ProtectedTeamAdminRoute";
 
 const clubs = [
   {
@@ -327,6 +329,7 @@ function App() {
           }
         />
 
+
         {/* LOGIN AND REGISTER */}
         <Route
           path="/login"
@@ -360,6 +363,14 @@ function App() {
             </ProtectedAdminRoute>
           }
         />
+        <Route
+  path="/team-admin"
+  element={
+    <ProtectedTeamAdminRoute>
+      <TeamAdminDashboard />
+    </ProtectedTeamAdminRoute>
+  }
+/>
 
         {/* DRAMA CLUB */}
         <Route path="/clubs/drama" element={<DramaClub />} />

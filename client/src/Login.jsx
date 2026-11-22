@@ -32,8 +32,15 @@ function Login() {
       // Save login information in the browser
       setToken(data.token);
       setCurrentUser({ ...data.student, loggedIn: true });
-
-      navigate(data.student.role === 'admin' ? '/admin' : '/', { replace: true });
+console.log("Logged-in user role:", data.student.role);
+      navigate(
+  data.student.role === 'super_admin'
+    ? '/admin'
+    : data.student.role === 'team_admin'
+      ? '/team-admin'
+      : '/',
+  { replace: true }
+);
 
     } catch (error) {
       setMessage(error.message);
