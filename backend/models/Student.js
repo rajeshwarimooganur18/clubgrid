@@ -42,6 +42,20 @@ const studentSchema = new mongoose.Schema({
         default: '',
         trim: true
     },
+    phoneNumber: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    idCardUrl: {
+        type: String,
+        default: '',
+        trim: true
+    },
+    smsConsent: {
+        type: Boolean,
+        default: false
+    },
     role: {
         type: String,
         enum: ['student', 'admin'],

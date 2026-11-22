@@ -6,6 +6,11 @@ const normalizeText = (value) => typeof value === 'string' ? value.trim() : '';
 // Submit a new club application
 exports.createApplication = async (req, res) => {
     try {
+        if (!req.user || req.user.role !== 'student') {
+            return res.status(403).json({
+                message: 'Only students can submit applications.'
+            });
+        }
         const body = req.body || {};
         const studentUser = req.user;
         const studentId = studentUser._id;

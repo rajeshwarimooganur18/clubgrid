@@ -1,6 +1,8 @@
 ﻿const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const path = require('path');
+const fs = require('fs');
 const Student = require('../models/Student');
 const sendPasswordResetEmail = require('../utils/passwordResetEmail');
 
@@ -17,21 +19,76 @@ const generateToken = (student) => {
     );
 };
 
+// Validate file content by checking magic numbers
+const validateFileContent = (filePath) => {
+    return new Promise((resolve, reject) => {
+        const buffer = Buffer.alloc(8);
+        const fd = fs.openSync(filePath, 'r');
+        fs.readSync(fd, buffer, 0, 8, 0);
+        fs.closeSync(fd);
+
+        // Check magic numbers
+        // JPEG: FF D8 FF
+        // PNG: 89 50 4E 47 0D 0A 1A 0A
+        // PDF: 25 50 44 46 (%PDF)
+        const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+        const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+        const isPdf = buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+
+        if (isJpeg || isPng || isPdf) {
+            resolve(true);
+        } else {
+            reject(new Error('Invalid file content. Only JPEG, PNG, and PDF files are allowed.'));
+        }
+    });
+};
+
+// Clean up uploaded file
+const cleanupFile = (filePath) => {
+    try {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    } catch (err) {
+        console.error('Failed to cleanup uploaded file:', err);
+    }
+};
+
 // Register a new student
 exports.register = async (req, res) => {
+    let uploadedFilePath = null;
+
     try {
-        const { fullName, email, password, department, year, studentId } = req.body;
+        // Handle both JSON and multipart/form-data
+        const { fullName, email, password, department, year, studentId, phoneNumber, smsConsent } = req.body;
 
         if (!fullName || !email || !password || !department || !year ||
             typeof studentId !== 'string' || !studentId.trim()) {
+            // Clean up uploaded file if validation fails
+            if (req.file && req.file.path) {
+                cleanupFile(req.file.path);
+            }
             return res.status(400).json({
                 message: 'Please provide full name, email, password, department, year, and USN.'
             });
         }
 
         if (password.length < 6) {
+            if (req.file && req.file.path) {
+                cleanupFile(req.file.path);
+            }
             return res.status(400).json({
                 message: 'Password must be at least 6 characters long.'
+            });
+        }
+
+        // Validate phone number if provided
+        if (phoneNumber && (typeof phoneNumber !== 'string' || phoneNumber.length !== 10 || !/^\d{10}$/.test(phoneNumber))) {
+            if (req.file && req.file.path) {
+                cleanupFile(req.file.path);
+            }
+            return res.status(400).json({
+                message: 'Phone number must be a valid 10-digit number.'
             });
         }
 
@@ -40,6 +97,9 @@ exports.register = async (req, res) => {
         const existingStudent = await Student.findOne({ email: normalizedEmail });
 
         if (existingStudent) {
+            if (req.file && req.file.path) {
+                cleanupFile(req.file.path);
+            }
             return res.status(409).json({
                 message: 'An account with this email address already exists. Please log in.'
             });
@@ -51,9 +111,28 @@ exports.register = async (req, res) => {
         }).select('_id');
 
         if (existingStudentId) {
+            if (req.file && req.file.path) {
+                cleanupFile(req.file.path);
+            }
             return res.status(409).json({
                 message: 'This USN is already associated with another student.'
             });
+        }
+
+        // Validate and process ID card file if uploaded
+        let idCardUrl = '';
+        if (req.file && req.file.path) {
+            uploadedFilePath = req.file.path;
+            try {
+                await validateFileContent(uploadedFilePath);
+                // Store relative path for security - files are not publicly accessible
+                idCardUrl = path.join('uploads', 'id-cards', path.basename(uploadedFilePath)).replace(/\\/g, '/');
+            } catch (fileError) {
+                cleanupFile(uploadedFilePath);
+                return res.status(400).json({
+                    message: fileError.message
+                });
+            }
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -65,6 +144,9 @@ exports.register = async (req, res) => {
             department: department.trim(),
             year: year.trim(),
             studentId: normalizedStudentId,
+            phoneNumber: phoneNumber || '',
+            idCardUrl: idCardUrl,
+            smsConsent: smsConsent === 'true' || smsConsent === true,
             role: 'student'
         });
 
@@ -82,10 +164,17 @@ exports.register = async (req, res) => {
                 department: newStudent.department,
                 year: newStudent.year,
                 studentId: newStudent.studentId,
+                phoneNumber: newStudent.phoneNumber,
+                idCardUrl: newStudent.idCardUrl,
+                smsConsent: newStudent.smsConsent,
                 role: newStudent.role
             }
         });
     } catch (error) {
+        // Clean up uploaded file on any error
+        if (uploadedFilePath) {
+            cleanupFile(uploadedFilePath);
+        }
         console.error('Registration controller error:', error);
         res.status(500).json({
             message: 'Server error during registration. Please try again later.'
